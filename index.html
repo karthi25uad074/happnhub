@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HappnHub | Campus Events</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header class="navbar">
+    <a class="logo" href="#">Happn<span>Hub</span></a>
+
+    <nav>
+      <a href="#events">Explore Events</a>
+      <a href="#saved">Saved Events</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">YOUR CAMPUS, HAPPENING NOW</p>
+      <h1>Never miss what’s <span>next.</span></h1>
+      <p class="hero-text">
+        Discover workshops, hackathons, cultural events, and every campus moment in one place.
+      </p>
+      <a class="primary-button" href="#events">Explore events</a>
+    </section>
+
+    <section class="events-section" id="events">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">DISCOVER</p>
+          <h2>Upcoming events</h2>
+        </div>
+
+        <input
+          type="search"
+          id="searchInput"
+          placeholder="Search events..."
+          aria-label="Search events"
+        >
+      </div>
+
+      <div class="filters">
+        <button class="filter-button active" data-category="All">All</button>
+        <button class="filter-button" data-category="Technical">Technical</button>
+        <button class="filter-button" data-category="Workshop">Workshop</button>
+        <button class="filter-button" data-category="Cultural">Cultural</button>
+        <button class="filter-button" data-category="Sports">Sports</button>
+      </div>
+
+      <div class="event-grid" id="eventGrid"></div>
+    </section>
+
+    <section class="saved-section" id="saved">
+      <p class="eyebrow">YOUR LIST</p>
+      <h2>Saved events</h2>
+      <div class="saved-events" id="savedEvents"></div>
+    </section>
+  </main>
+
+  <div class="modal hidden" id="eventModal">
+    <div class="modal-content">
+      <button class="close-button" id="closeModal" aria-label="Close">&times;</button>
+      <div id="modalDetails"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 HappnHub. Built for campus life.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
