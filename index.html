@@ -94,29 +94,49 @@
     </div>
   </div>
   <script>
-  // Variable names-ah unique-ah 'hh' (HappnHub) nu prefix panni iruken. So duplicate error varathu!
   const hhLoginBtn = document.getElementById('loginBtn');
   const hhLoginModal = document.getElementById('loginModal');
-  const hhCloseModal = document.getElementById('closeModal');
+  const hhCloseModal = document.getElementById('closeModal') || document.querySelector('.close-icon');
   const hhLoginForm = document.getElementById('loginForm');
   const hhErrorMsg = document.getElementById('errorMsg');
   const HH_COMMON_PASSWORD = "Campus@123"; 
 
-  // 1. Open popup
+  // 1. Login button click logic (Inga thaan LOGOUT feature sethuruken)
   if (hhLoginBtn && hhLoginModal) {
     hhLoginBtn.addEventListener('click', () => { 
-      hhLoginModal.style.display = 'flex'; 
+      const savedRollNo = localStorage.getItem('studentRollNo');
+
+      if (savedRollNo) {
+        // PUDHU LOGIC: Already login aagi irundha, click panrappa confirm ketkum
+        if (confirm(`Hey ${savedRollNo}, do you want to Logout?`)) {
+          localStorage.removeItem('studentRollNo'); // Data-va clear panrom
+          alert("Logged out successfully!");
+          location.reload(); // Page-ah refresh panni pazhaya madhiri maathuroam
+        }
+      } else {
+        // Pazhaya logic: Login aalana popup thirakkum
+        hhLoginModal.style.display = 'flex'; 
+      }
     });
   }
 
-  // 2. Close popup
+  // 2. Close popup (Cross mark click)
   if (hhCloseModal && hhLoginModal) {
     hhCloseModal.addEventListener('click', () => { 
       hhLoginModal.style.display = 'none'; 
     });
   }
 
-  // 3. Login submit logic
+  // 3. Popup-ku veliyila click pannalum close aagum
+  if (hhLoginModal) {
+    hhLoginModal.addEventListener('click', (e) => {
+      if (e.target === hhLoginModal) {
+        hhLoginModal.style.display = 'none';
+      }
+    });
+  }
+
+  // 4. Login submit logic
   if (hhLoginForm) {
     hhLoginForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -134,7 +154,7 @@
     });
   }
 
-  // 4. Stay logged in on refresh
+  // 5. Stay logged in on refresh
   window.onload = () => {
     const savedRollNo = localStorage.getItem('studentRollNo');
     if (savedRollNo && hhLoginBtn) { hhLoginBtn.innerText = `👤 ${savedRollNo}`; }
