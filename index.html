@@ -9,6 +9,20 @@
 </head>
 
 <body>
+  <!-- Admin Buttons Panel (Fresh-ah add panrom) -->
+<div class="admin-control-panel" style="text-align: center; margin: 20px; padding: 10px;">
+  <button class="admin-btn" style="display: none; padding: 10px 20px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; font-weight: bold;">
+    ➕ Add Event
+  </button>
+  
+  <button class="admin-btn" style="display: none; padding: 10px 20px; font-size: 16px; background-color: #ffc107; color: black; border: none; border-radius: 5px; cursor: pointer; margin: 5px; font-weight: bold;">
+    ✏️ Edit Event
+  </button>
+  
+  <button class="admin-btn" style="display: none; padding: 10px 20px; font-size: 16px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; font-weight: bold;">
+    ❌ Delete Event
+  </button>
+</div>
   <header class="navbar">
     <a class="logo" href="#">Happn<span>Hub</span></a>
 
@@ -99,65 +113,101 @@
   const hhCloseModal = document.getElementById('closeModal') || document.querySelector('.close-icon');
   const hhLoginForm = document.getElementById('loginForm');
   const hhErrorMsg = document.getElementById('errorMsg');
-  const HH_COMMON_PASSWORD = "Campus@123"; 
+  
+  // Passwords & IDs
+  const STUDENT_PASSWORD = "Campus@123"; 
+  const ADMIN_ID = "CONTROLLER01";
+  const ADMIN_PASSWORD = "Admin@HappnHub";
 
-  // 1. Login button click logic (Inga thaan LOGOUT feature sethuruken)
+  // FUNCTION: Admin buttons-ah kaaturoama illa maraikuroama nu check panna
+  function manageAdminFeatures() {
+    const role = localStorage.getItem('userRole');
+    const adminButtons = document.querySelectorAll('.admin-btn');
+    
+    adminButtons.forEach(btn => {
+      if (role === 'admin') {
+        btn.style.display = 'inline-block'; // Admin-ku mattum buttons theryum
+      } else {
+        btn.style.display = 'none'; // Students-ku hide aagidum
+      }
+    });
+  }
+
+  // 1. Login / Logout button click
   if (hhLoginBtn && hhLoginModal) {
     hhLoginBtn.addEventListener('click', () => { 
       const savedRollNo = localStorage.getItem('studentRollNo');
 
       if (savedRollNo) {
-        // PUDHU LOGIC: Already login aagi irundha, click panrappa confirm ketkum
         if (confirm(`Hey ${savedRollNo}, do you want to Logout?`)) {
-          localStorage.removeItem('studentRollNo'); // Data-va clear panrom
+          localStorage.removeItem('studentRollNo');
+          localStorage.removeItem('userRole'); // Role-ah clear panrom
           alert("Logged out successfully!");
-          location.reload(); // Page-ah refresh panni pazhaya madhiri maathuroam
+          location.reload();
         }
       } else {
-        // Pazhaya logic: Login aalana popup thirakkum
         hhLoginModal.style.display = 'flex'; 
       }
     });
   }
 
-  // 2. Close popup (Cross mark click)
+  // 2. Close popup
   if (hhCloseModal && hhLoginModal) {
-    hhCloseModal.addEventListener('click', () => { 
-      hhLoginModal.style.display = 'none'; 
-    });
+    hhCloseModal.addEventListener('click', () => { hhLoginModal.style.display = 'none'; });
   }
 
-  // 3. Popup-ku veliyila click pannalum close aagum
+  // 3. Popup-ku veliyila click panna close aagum
   if (hhLoginModal) {
     hhLoginModal.addEventListener('click', (e) => {
-      if (e.target === hhLoginModal) {
-        hhLoginModal.style.display = 'none';
-      }
+      if (e.target === hhLoginModal) { hhLoginModal.style.display = 'none'; }
     });
   }
 
-  // 4. Login submit logic
+  // 4. Login submit logic (Student vs Controller Check)
   if (hhLoginForm) {
     hhLoginForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const rollNo = document.getElementById('rollNo').value.toUpperCase();
       const password = document.getElementById('password').value;
 
-      if (password === HH_COMMON_PASSWORD) {
+      // CASE A: Controller (Admin) Login check
+      if (rollNo === ADMIN_ID && password === ADMIN_PASSWORD) {
+        localStorage.setItem('studentRollNo', 'ADMIN');
+        localStorage.setItem('userRole', 'admin'); // Set role as admin
+        hhLoginModal.style.display = 'none';
+        alert("Welcome Controller! Admin Mode Activated.");
+        hhLoginBtn.innerText = `⚙️ Admin`;
+        manageAdminFeatures();
+      } 
+      // CASE B: Normal Student Login check
+      else if (password === STUDENT_PASSWORD) {
         localStorage.setItem('studentRollNo', rollNo);
+        localStorage.setItem('userRole', 'student'); // Set role as student
         hhLoginModal.style.display = 'none';
         alert(`Welcome, ${rollNo}! Login Successful.`);
         hhLoginBtn.innerText = `👤 ${rollNo}`;
-      } else {
+        manageAdminFeatures();
+      } 
+      // CASE C: Wrong Password
+      else {
         if(hhErrorMsg) hhErrorMsg.style.display = 'block';
       }
     });
   }
 
-  // 5. Stay logged in on refresh
+  // 5. On page load (Check status)
   window.onload = () => {
     const savedRollNo = localStorage.getItem('studentRollNo');
-    if (savedRollNo && hhLoginBtn) { hhLoginBtn.innerText = `👤 ${savedRollNo}`; }
+    const role = localStorage.getItem('userRole');
+    
+    if (savedRollNo && hhLoginBtn) { 
+      if (role === 'admin') {
+        hhLoginBtn.innerText = `⚙️ Admin`;
+      } else {
+        hhLoginBtn.innerText = `👤 ${savedRollNo}`; 
+      }
+    }
+    manageAdminFeatures(); // Page load aagumpothe check pannidum
   };
 </script>
 </body>
