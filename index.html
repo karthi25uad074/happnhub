@@ -15,6 +15,7 @@
     <nav>
       <a href="#events">Explore Events</a>
       <a href="#saved">Saved Events</a>
+      <button id="loginBtn" class="login-button">Login</button>
     </nav>
   </header>
 
@@ -73,5 +74,57 @@
   </footer>
 
   <script src="script.js"></script>
+  <!-- 1. Login Modal Popup Box -->
+  <div id="loginModal" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+      <span id="closeModal" class="close-icon">&times;</span>
+      <h2>Student Login</h2>
+      <form id="loginForm">
+        <div class="input-group">
+          <label for="rollNo">Roll Number</label>
+          <input type="text" id="rollNo" placeholder="E.g., 25UAD074" required>
+        </div>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter common password" required>
+        </div>
+        <p id="errorMsg" style="color: red; display: none; font-size: 14px;">Invalid Password!</p>
+        <button type="submit" class="submit-btn">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. JavaScript Logic (Thaniya file venaam, ingaye pottukalam) -->
+  <script>
+    const loginBtn = document.getElementById('loginBtn');
+    const loginModal = document.getElementById('loginModal');
+    const closeModal = document.getElementById('closeModal');
+    const loginForm = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const COMMON_PASSWORD = "Campus@123"; 
+
+    loginBtn.addEventListener('click', () => { loginModal.style.display = 'flex'; });
+    closeModal.addEventListener('click', () => { loginModal.style.display = 'none'; });
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const rollNo = document.getElementById('rollNo').value.toUpperCase();
+      const password = document.getElementById('password').value;
+
+      if (password === COMMON_PASSWORD) {
+        localStorage.setItem('studentRollNo', rollNo);
+        loginModal.style.display = 'none';
+        alert(`Welcome, ${rollNo}! Login Successful.`);
+        loginBtn.innerText = `👤 ${rollNo}`;
+      } else {
+        errorMsg.style.display = 'block';
+      }
+    });
+
+    window.onload = () => {
+      const savedRollNo = localStorage.getItem('studentRollNo');
+      if (savedRollNo) { loginBtn.innerText = `👤 ${savedRollNo}`; }
+    };
+  </script>
 </body>
 </html>
