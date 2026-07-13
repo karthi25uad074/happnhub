@@ -219,24 +219,16 @@ document.getElementById('saveEventBtn').addEventListener('click', function() {
         location.reload(); // Re-render logic illa na page auto reload panni screen update aagum
     }
 });
- // --- HAPPNHUB EVENT CONTROLLER LOGIC ---
-// 1. Popup Box View Functions
+// --- NEW CLEAN EVENT LOGIC ---
+
 function openAddEventModal() {
     document.getElementById('eventModal').style.display = 'flex';
 }
 
 function closeEventModal() {
     document.getElementById('eventModal').style.display = 'none';
-    // Reset inputs to clean state
-    document.getElementById('formEventName').value = '';
-    document.getElementById('formVenue').value = '';
-    document.getElementById('formStudentLimit').value = '';
-    document.getElementById('formHasFee').value = 'No';
-    document.getElementById('feeAmountContainer').style.display = 'none';
-    document.getElementById('formFeeAmount').value = '0';
 }
 
-// 2. Dynamic Entry Fee Input Check
 function toggleFeeInput() {
     const hasFee = document.getElementById('formHasFee').value;
     const feeContainer = document.getElementById('feeAmountContainer');
@@ -244,46 +236,28 @@ function toggleFeeInput() {
         feeContainer.style.display = 'block';
     } else {
         feeContainer.style.display = 'none';
-        document.getElementById('formFeeAmount').value = '0';
     }
 }
 
-// 3. Save Button Event Handling Logic
 document.getElementById('saveEventBtn').addEventListener('click', function() {
-    const name = document.getElementById('formEventName').value.trim();
-    const theme = document.getElementById('formEventTheme').value;
-    const startTime = document.getElementById('formStartTime').value;
-    const endTime = document.getElementById('formEndTime').value;
-    const venue = document.getElementById('formVenue').value.trim();
-    const hasFee = document.getElementById('formHasFee').value;
-    const feeAmount = document.getElementById('formFeeAmount').value;
+    const name = document.getElementById('formEventName').value;
+    const venue = document.getElementById('formVenue').value;
     const studentLimit = document.getElementById('formStudentLimit').value;
 
-    // Direct Validation Check
     if(!name || !venue || !studentLimit) {
-        alert("Boss! Kandippa Ella fields-ayum fill pannunga.");
+        alert("Ella fields-um fill pannunga boss!");
         return;
     }
 
-    // Creating object matching requirements
+    // Direct push
     const newEvent = {
-        id: Date.now(),
         name: name,
-        theme: theme,
-        startTime: startTime,
-        endTime: endTime,
-        venue: venue,
-        entryFee: hasFee === 'Yes' ? `Rs. ${feeAmount}` : 'Free Entry',
-        limit: studentLimit
+        theme: document.getElementById('formEventTheme').value,
+        venue: venue
     };
-
-    // Push into active arrays
-    events.push(newEvent);
+    if (typeof events !== 'undefined') { events.push(newEvent); } else { var events = [newEvent]; }
     localStorage.setItem('hhEvents', JSON.stringify(events));
-
-    alert("Mass boss! New event website la upload aayidichu!");
-    closeEventModal();
     
-    // Page auto refresh critical to instantly reflect changes
-    location.reload(); 
+    alert("Event saved!");
+    location.reload();
 });

@@ -184,82 +184,16 @@
       manageAdminFeatures(); // Page load aagumpothe check pannidum
     };
 </script>
-<!-- Event Add Panra Popup Modal Box (Foolproof Color Version) -->
-<div id="eventModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85) !important; z-index: 99999 !important; justify-content: center; align-items: center; font-family: sans-serif !important;">
-  <div style="background-color: #ffffff !important; color: #111111 !important; padding: 30px !important; border-radius: 12px !important; width: 90% !important; max-width: 500px !important; box-shadow: 0px 10px 30px rgba(0,0,0,0.5) !important; max-height: 85vh !important; overflow-y: auto !important; box-sizing: border-box !important; text-align: left !important;">
-    
-    <h2 style="margin-top: 0 !important; margin-bottom: 5px !important; color: #111111 !important; font-size: 24px !important; font-weight: bold !important;">➕ Add New Campus Event</h2>
-    <p style="color: #666666 !important; font-size: 13px !important; margin-top: 0 !important; margin-bottom: 20px !important;">Fill in the details to upload the event live on HappnHub.</p>
-    <hr style="border: 0 !important; border-top: 1px solid #e2e8f0 !important; margin-bottom: 20px !important;">
-
-    <div>
-      <!-- 1. Event Name -->
-      <div style="margin-bottom: 15px !important;">
-        <label style="display: block !important; color: #111111 !important; font-weight: 600 !important; margin-bottom: 6px !important; font-size: 14px !important;">1. Event Name *</label>
-        <input type="text" id="formEventName" placeholder="e.g., National Coding Hackathon" style="width: 100% !important; padding: 10px !important; border: 2px solid #cbd5e1 !important; border-radius: 6px !important; background-color: #ffffff !important; color: #111111 !important; font-size: 15px !important; box-sizing: border-box !important; outline: none !important;">
-      </div>
-
-      <!-- 2. Event Theme -->
-      <div style="margin-bottom: 15px !important;">
-        <label style="display: block !important; color: #111111 !important; font-weight: 600 !important; margin-bottom: 6px !important; font-size: 14px !important;">2. Event Theme *</label>
-        <select id="formEventTheme" style="width: 100% !important; padding: 10px !important; border: 2px solid #cbd5e1 !important; border-radius: 6px !important; background-color: #ffffff !important; color: #111111 !important; font-size: 15px !important; box-sizing: border-box !important; outline: none !important; height: 42px !important;">
-          <option value="Technical">Technical</option>
-          <option value="Workshop">Workshop</option>
-          <option value="Culturals">Culturals</option>
-          <option value="Sports">Sports</option>
-        </select>
-      </div>
-
-      <!-- 3. Start & End Time -->
-      <div style="margin-bottom: 15px !important;">
-        <label style="display: block !important; color: #111111 !important; font-weight: 600 !important; margin-bottom: 6px !important; font-size: 14px !important;">3. Date & Time *</label>
-        <div style="display: flex !important; gap: 10px !important;">
-          <div style="flex: 1 !important;">
-            <span style="font-size: 11px !important; color: #666666 !important; display: block !important; margin-bottom: 2px !important;">Starts at:</span>
-            <input type="datetime-local" id="formStartTime" style="width: 100% !important; padding: 10px !important; border: 2px solid #cbd5e1 !important; border-radius: 6px !important; background-color: #ffffff !important; color: #111111 !important; font-size: 14px !important; box-sizing: border-box !important;">
-          </div>
-          <div style="flex: 1 !important;">
-            <span style="font-size: 11px !important; color: #666666 !important; display: block !important; margin-bottom: 2px !important;">Ends at:</span>
-            <input type="datetime-local" id="formEndTime" style="width: 100% !important; padding: 10px !important; border: 2px solid #cbd5e1 !important; border-radius: 6px !important; background-color: #ffffff !important; color: #111111 !important; font-size: 14px !important; box-sizing: border-box !important;">
-          </div>
-        </div>
-      </div>
-
-      <!-- 4. Event Venue -->
-      <div style="margin-bottom: 15px !important;">
-        <label style="display: block !important; color: #111111 !important; font-weight: 600 !important; margin-bottom: 6px !important; font-size: 14px !important;">4. Event Venue *</label>
-        <input type="text" id="formVenue" placeholder="e.g., Main Seminar Hall / Tech Block Lab 3" style="width: 100% !important; padding: 10px !important; border: 2px solid #cbd5e1 !important; border-radius: 6px !important; background-color: #ffffff !important; color: #111111 !important; font-size: 15px !important; box-sizing: border-box !important; outline: none !important;">
-      </div>
-
-      <!-- 5. Entry Fees Check -->
-      <div style="margin-bottom: 15px !important;">
-        <label style="display: block !important; color: #111111 !important; font-weight: 600 !important; margin-bottom: 6px !important; font-size: 14px !important;">5. Entry Fees Irukka? *</label>
-        <select id="formHasFee" onchange="toggleFeeInput()" style="width: 100% !important; padding: 10px !important; border: 2px solid #cbd5e1 !important; border-radius: 6px !important; background-color: #ffffff !important; color: #111111 !important; font-size: 15px !important; box-sizing: border-box !important; outline: none !important; height: 42px !important;">
-          <option value="No">No (Free Entry)</option>
-          <option value="Yes">Yes (Paid)</option>
-        </select>
-      </div>
-
-      <!-- 6. Entry Fee Amount (Hidden by default) -->
-      <div id="feeAmountContainer" style="display: none; margin-bottom: 15px !important;">
-        <label style="display: block !important; color: #111111 !important; font-weight: 600 !important; margin-bottom: 6px !important; font-size: 14px !important;">6. Entry Fee Amount (Rs) *</label>
-        <input type="number" id="formFeeAmount" value="0" placeholder="e.g., 150" style="width: 100% !important; padding: 10px !important; border: 2px solid #cbd5e1 !important; border-radius: 6px !important; background-color: #ffffff !important; color: #111111 !important; font-size: 15px !important; box-sizing: border-box !important; outline: none !important;">
-      </div>
-
-      <!-- 7. Total Student Limit -->
-      <div style="margin-bottom: 25px !important;">
-        <label style="display: block !important; color: #111111 !important; font-weight: 600 !important; margin-bottom: 6px !important; font-size: 14px !important;">7. Total Student Limit *</label>
-        <input type="number" id="formStudentLimit" placeholder="e.g., 100" style="width: 100% !important; padding: 10px !important; border: 2px solid #cbd5e1 !important; border-radius: 6px !important; background-color: #ffffff !important; color: #111111 !important; font-size: 15px !important; box-sizing: border-box !important; outline: none !important;">
-      </div>
-
-      <!-- 8. Action Buttons (Save and Cancel) -->
-      <div style="display: flex !important; justify-content: flex-end !important; gap: 12px !important;">
-        <button type="button" onclick="closeEventModal()" style="padding: 12px 20px !important; background-color: #f1f5f9 !important; color: #475569 !important; border: 1px solid #cbd5e1 !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 600 !important; font-size: 14px !important;">Cancel</button>
-        <button type="button" id="saveEventBtn" style="padding: 12px 24px !important; background-color: #22c55e !important; color: #ffffff !important; border: none !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 700 !important; font-size: 14px !important; box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.2) !important;">8. Save Event</button>
-      </div>
-
+<div id="eventModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999999; justify-content:center; align-items:center;">
+    <div style="background:#fff; padding:30px; border-radius:10px; width:350px; color:#000;">
+        <h2 style="color:#000;">Add Event</h2>
+        <input type="text" id="formEventName" placeholder="Event Name" style="width:100%; padding:10px; margin-bottom:10px; color:#000;">
+        <input type="text" id="formVenue" placeholder="Venue" style="width:100%; padding:10px; margin-bottom:10px; color:#000;">
+        <input type="number" id="formStudentLimit" placeholder="Limit" style="width:100%; padding:10px; margin-bottom:10px; color:#000;">
+        <br>
+        <button onclick="closeEventModal()" style="padding:10px; background:#ccc;">Cancel</button>
+        <button id="saveEventBtn" style="padding:10px; background:green; color:#fff;">Save Event</button>
     </div>
-  </div>
 </div>
 </body>
 </html>
