@@ -93,38 +93,52 @@
       </form>
     </div>
   </div>
-
-  <!-- 2. JavaScript Logic (Thaniya file venaam, ingaye pottukalam) -->
   <script>
-    const loginBtn = document.getElementById('loginBtn');
-    const loginModal = document.getElementById('loginModal');
-    const closeModal = document.getElementById('closeModal');
-    const loginForm = document.getElementById('loginForm');
-    const errorMsg = document.getElementById('errorMsg');
-    const COMMON_PASSWORD = "Campus@123"; 
+  // Variable names-ah unique-ah 'hh' (HappnHub) nu prefix panni iruken. So duplicate error varathu!
+  const hhLoginBtn = document.getElementById('loginBtn');
+  const hhLoginModal = document.getElementById('loginModal');
+  const hhCloseModal = document.getElementById('closeModal');
+  const hhLoginForm = document.getElementById('loginForm');
+  const hhErrorMsg = document.getElementById('errorMsg');
+  const HH_COMMON_PASSWORD = "Campus@123"; 
 
-    loginBtn.addEventListener('click', () => { loginModal.style.display = 'flex'; });
-    closeModal.addEventListener('click', () => { loginModal.style.display = 'none'; });
+  // 1. Open popup
+  if (hhLoginBtn && hhLoginModal) {
+    hhLoginBtn.addEventListener('click', () => { 
+      hhLoginModal.style.display = 'flex'; 
+    });
+  }
 
-    loginForm.addEventListener('submit', (e) => {
+  // 2. Close popup
+  if (hhCloseModal && hhLoginModal) {
+    hhCloseModal.addEventListener('click', () => { 
+      hhLoginModal.style.display = 'none'; 
+    });
+  }
+
+  // 3. Login submit logic
+  if (hhLoginForm) {
+    hhLoginForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const rollNo = document.getElementById('rollNo').value.toUpperCase();
       const password = document.getElementById('password').value;
 
-      if (password === COMMON_PASSWORD) {
+      if (password === HH_COMMON_PASSWORD) {
         localStorage.setItem('studentRollNo', rollNo);
-        loginModal.style.display = 'none';
+        hhLoginModal.style.display = 'none';
         alert(`Welcome, ${rollNo}! Login Successful.`);
-        loginBtn.innerText = `👤 ${rollNo}`;
+        hhLoginBtn.innerText = `👤 ${rollNo}`;
       } else {
-        errorMsg.style.display = 'block';
+        if(hhErrorMsg) hhErrorMsg.style.display = 'block';
       }
     });
+  }
 
-    window.onload = () => {
-      const savedRollNo = localStorage.getItem('studentRollNo');
-      if (savedRollNo) { loginBtn.innerText = `👤 ${savedRollNo}`; }
-    };
-  </script>
+  // 4. Stay logged in on refresh
+  window.onload = () => {
+    const savedRollNo = localStorage.getItem('studentRollNo');
+    if (savedRollNo && hhLoginBtn) { hhLoginBtn.innerText = `👤 ${savedRollNo}`; }
+  };
+</script>
 </body>
 </html>
