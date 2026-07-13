@@ -4,35 +4,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HappnHub | Campus Events</title>
-
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
   <!-- Admin Buttons Panel (Fresh-ah add panrom) -->
-<div class="admin-control-panel" style="text-align: center; margin: 20px; padding: 10px;">
-  <button class="admin-btn" style="display: none; padding: 10px 20px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; font-weight: bold;">
-    ➕ Add Event
   </button>
   
-  <button class="admin-btn" style="display: none; padding: 10px 20px; font-size: 16px; background-color: #ffc107; color: black; border: none; border-radius: 5px; cursor: pointer; margin: 5px; font-weight: bold;">
-    ✏️ Edit Event
-  </button>
-  
-  <button class="admin-btn" style="display: none; padding: 10px 20px; font-size: 16px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; font-weight: bold;">
-    ❌ Delete Event
-  </button>
-</div>
+  <div class="admin-control-panel" style="text-align: center; margin: 20px; padding: 10px;">
+    <button class="admin-btn"
+      style="display: none; padding: 10px 20px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; font-weight: bold;"
+      onclick="openAddEventModal()">
+      ➕ Add Event
+    </button>
+    <button class="admin-btn"
+      style="display: none; padding: 10px 20px; font-size: 16px; background-color: #ffc107; color: black; border: none; border-radius: 5px; cursor: pointer; margin: 5px; font-weight: bold;">
+      ✏️ Edit Event
+    </button>
+    <button class="admin-btn"
+      style="display: none; padding: 10px 20px; font-size: 16px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; font-weight: bold;">
+      ❌ Delete Event
+    </button>
+  </div>
   <header class="navbar">
     <a class="logo" href="#">Happn<span>Hub</span></a>
-
     <nav>
       <a href="#events">Explore Events</a>
       <a href="#saved">Saved Events</a>
       <button id="loginBtn" class="login-button">Login</button>
     </nav>
   </header>
-
   <main>
     <section class="hero">
       <p class="eyebrow">YOUR CAMPUS, HAPPENING NOW</p>
@@ -42,22 +42,14 @@
       </p>
       <a class="primary-button" href="#events">Explore events</a>
     </section>
-
     <section class="events-section" id="events">
       <div class="section-heading">
         <div>
           <p class="eyebrow">DISCOVER</p>
           <h2>Upcoming events</h2>
         </div>
-
-        <input
-          type="search"
-          id="searchInput"
-          placeholder="Search events..."
-          aria-label="Search events"
-        >
+        <input type="search" id="searchInput" placeholder="Search events..." aria-label="Search events">
       </div>
-
       <div class="filters">
         <button class="filter-button active" data-category="All">All</button>
         <button class="filter-button" data-category="Technical">Technical</button>
@@ -65,28 +57,23 @@
         <button class="filter-button" data-category="Cultural">Cultural</button>
         <button class="filter-button" data-category="Sports">Sports</button>
       </div>
-
       <div class="event-grid" id="eventGrid"></div>
     </section>
-
     <section class="saved-section" id="saved">
       <p class="eyebrow">YOUR LIST</p>
       <h2>Saved events</h2>
       <div class="saved-events" id="savedEvents"></div>
     </section>
   </main>
-
   <div class="modal hidden" id="eventModal">
     <div class="modal-content">
       <button class="close-button" id="closeModal" aria-label="Close">&times;</button>
       <div id="modalDetails"></div>
     </div>
   </div>
-
   <footer>
     <p>© 2026 HappnHub. Built for campus life.</p>
   </footer>
-
   <script src="script.js"></script>
   <!-- 1. Login Modal Popup Box -->
   <div id="loginModal" class="modal-overlay" style="display: none;">
@@ -107,108 +94,153 @@
       </form>
     </div>
   </div>
- <script>
-  const hhLoginBtn = document.getElementById('loginBtn');
-  const hhLoginModal = document.getElementById('loginModal');
-  const hhCloseModal = document.getElementById('closeModal') || document.querySelector('.close-icon');
-  const hhLoginForm = document.getElementById('loginForm');
-  const hhErrorMsg = document.getElementById('errorMsg');
-  
-  // Passwords & IDs
-  const STUDENT_PASSWORD = "Campus@123"; 
-  const ADMIN_ID = "CONTROLLER01";
-  const ADMIN_PASSWORD = "Admin@HappnHub";
-
-  // FUNCTION: Admin buttons-ah kaaturoama illa maraikuroama nu check panna
-  function manageAdminFeatures() {
-    const role = localStorage.getItem('userRole');
-    const adminButtons = document.querySelectorAll('.admin-btn');
-    
-    adminButtons.forEach(btn => {
-      if (role === 'admin') {
-        btn.style.display = 'inline-block'; // Admin-ku mattum buttons theryum
-      } else {
-        btn.style.display = 'none'; // Students-ku hide aagidum
-      }
-    });
-  }
-
-  // 1. Login / Logout button click
-  if (hhLoginBtn && hhLoginModal) {
-    hhLoginBtn.addEventListener('click', () => { 
-      const savedRollNo = localStorage.getItem('studentRollNo');
-
-      if (savedRollNo) {
-        if (confirm(`Hey ${savedRollNo}, do you want to Logout?`)) {
-          localStorage.removeItem('studentRollNo');
-          localStorage.removeItem('userRole'); // Role-ah clear panrom
-          alert("Logged out successfully!");
-          location.reload();
+  <script>
+    const hhLoginBtn = document.getElementById('loginBtn');
+    const hhLoginModal = document.getElementById('loginModal');
+    const hhCloseModal = document.getElementById('closeModal') || document.querySelector('.close-icon');
+    const hhLoginForm = document.getElementById('loginForm');
+    const hhErrorMsg = document.getElementById('errorMsg');
+    // Passwords & IDs
+    const STUDENT_PASSWORD = "Campus@123";
+    const ADMIN_ID = "CONTROLLER01";
+    const ADMIN_PASSWORD = "Admin@HappnHub";
+    // FUNCTION: Admin buttons-ah kaaturoama illa maraikuroama nu check panna
+    function manageAdminFeatures() {
+      const role = localStorage.getItem('userRole');
+      const adminButtons = document.querySelectorAll('.admin-btn');
+      adminButtons.forEach(btn => {
+        if (role === 'admin') {
+          btn.style.display = 'inline-block'; // Admin-ku mattum buttons theryum
+        } else {
+          btn.style.display = 'none'; // Students-ku hide aagidum
         }
-      } else {
-        hhLoginModal.style.display = 'flex'; 
-      }
-    });
-  }
-
-  // 2. Close popup
-  if (hhCloseModal && hhLoginModal) {
-    hhCloseModal.addEventListener('click', () => { hhLoginModal.style.display = 'none'; });
-  }
-
-  // 3. Popup-ku veliyila click panna close aagum
-  if (hhLoginModal) {
-    hhLoginModal.addEventListener('click', (e) => {
-      if (e.target === hhLoginModal) { hhLoginModal.style.display = 'none'; }
-    });
-  }
-
-  // 4. Login submit logic (Student vs Controller Check)
-  if (hhLoginForm) {
-    hhLoginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const rollNo = document.getElementById('rollNo').value.toUpperCase();
-      const password = document.getElementById('password').value;
-
-      // CASE A: Controller (Admin) Login check
-      if (rollNo === ADMIN_ID && password === ADMIN_PASSWORD) {
-        localStorage.setItem('studentRollNo', 'ADMIN');
-        localStorage.setItem('userRole', 'admin'); // Set role as admin
-        hhLoginModal.style.display = 'none';
-        alert("Welcome Controller! Admin Mode Activated.");
-        hhLoginBtn.innerText = `⚙️ Admin`;
-        manageAdminFeatures();
-      } 
-      // CASE B: Normal Student Login check
-      else if (password === STUDENT_PASSWORD) {
-        localStorage.setItem('studentRollNo', rollNo);
-        localStorage.setItem('userRole', 'student'); // Set role as student
-        hhLoginModal.style.display = 'none';
-        alert(`Welcome, ${rollNo}! Login Successful.`);
-        hhLoginBtn.innerText = `👤 ${rollNo}`;
-        manageAdminFeatures();
-      } 
-      // CASE C: Wrong Password
-      else {
-        if(hhErrorMsg) hhErrorMsg.style.display = 'block';
-      }
-    });
-  }
-
-  // 5. On page load (Check status)
-  window.onload = () => {
-    const savedRollNo = localStorage.getItem('studentRollNo');
-    const role = localStorage.getItem('userRole');
-    
-    if (savedRollNo && hhLoginBtn) { 
-      if (role === 'admin') {
-        hhLoginBtn.innerText = `⚙️ Admin`;
-      } else {
-        hhLoginBtn.innerText = `👤 ${savedRollNo}`; 
-      }
+      });
     }
-    manageAdminFeatures(); // Page load aagumpothe check pannidum
-  };
+    // 1. Login / Logout button click
+    if (hhLoginBtn && hhLoginModal) {
+      hhLoginBtn.addEventListener('click', () => {
+        const savedRollNo = localStorage.getItem('studentRollNo');
+        if (savedRollNo) {
+          if (confirm(`Hey ${savedRollNo}, do you want to Logout?`)) {
+            localStorage.removeItem('studentRollNo');
+            localStorage.removeItem('userRole'); // Role-ah clear panrom
+            alert("Logged out successfully!");
+            location.reload();
+          }
+        } else {
+          hhLoginModal.style.display = 'flex';
+        }
+      });
+    }
+    // 2. Close popup
+    if (hhCloseModal && hhLoginModal) {
+      hhCloseModal.addEventListener('click', () => { hhLoginModal.style.display = 'none'; });
+    }
+    // 3. Popup-ku veliyila click panna close aagum
+    if (hhLoginModal) {
+      hhLoginModal.addEventListener('click', (e) => {
+        if (e.target === hhLoginModal) { hhLoginModal.style.display = 'none'; }
+      });
+    }
+    // 4. Login submit logic (Student vs Controller Check)
+    if (hhLoginForm) {
+      hhLoginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const rollNo = document.getElementById('rollNo').value.toUpperCase();
+        const password = document.getElementById('password').value;
+        // CASE A: Controller (Admin) Login check
+        if (rollNo === ADMIN_ID && password === ADMIN_PASSWORD) {
+          localStorage.setItem('studentRollNo', 'ADMIN');
+          localStorage.setItem('userRole', 'admin'); // Set role as admin
+          hhLoginModal.style.display = 'none';
+          alert("Welcome Controller! Admin Mode Activated.");
+          hhLoginBtn.innerText = `⚙️ Admin`;
+          manageAdminFeatures();
+        }
+        // CASE B: Normal Student Login check
+        else if (password === STUDENT_PASSWORD) {
+          localStorage.setItem('studentRollNo', rollNo);
+          localStorage.setItem('userRole', 'student'); // Set role as student
+          hhLoginModal.style.display = 'none';
+          alert(`Welcome, ${rollNo}! Login Successful.`);
+          hhLoginBtn.innerText = `👤 ${rollNo}`;
+          manageAdminFeatures();
+        }
+        // CASE C: Wrong Password
+        else {
+          if (hhErrorMsg) hhErrorMsg.style.display = 'block';
+        }
+      });
+    }
+    // 5. On page load (Check status)
+    window.onload = () => {
+      const savedRollNo = localStorage.getItem('studentRollNo');
+      const role = localStorage.getItem('userRole');
+      if (savedRollNo && hhLoginBtn) {
+        if (role === 'admin') {
+          hhLoginBtn.innerText = `⚙️ Admin`;
+        } else {
+          hhLoginBtn.innerText = `👤 ${savedRollNo}`;
+        }
+      }
+      manageAdminFeatures(); // Page load aagumpothe check pannidum
+    };
 </script>
+<!-- Event Add Panra Popup Modal Box (Fixed Color Version) -->
+<div id="eventModal" class="custom-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; justify-content: center; align-items: center;">
+  <div style="background: #ffffff !important; padding: 25px; border-radius: 10px; width: 90%; max-width: 500px; box-shadow: 0px 4px 15px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; text-align: left;">
+    
+    <h3 style="margin-top: 0; color: #111111 !important; font-weight: bold;">➕ Add New Event</h3>
+    <hr style="border:0; border-top: 1px solid #ccc; margin-bottom: 15px;">
+
+    <!-- 1. Event Name -->
+    <label style="color: #222222 !important; font-weight: bold; display: block; margin-bottom: 5px;">1. Event Name:</label>
+    <input type="text" id="formEventName" style="width:100%; margin-bottom:15px; padding:10px; border: 1px solid #888; border-radius: 4px; color: #000000 !important; background: #ffffff !important;" placeholder="Enter event name" required>
+
+    <!-- 2. Event Theme -->
+    <label style="color: #222222 !important; font-weight: bold; display: block; margin-bottom: 5px;">2. Event Theme:</label>
+    <select id="formEventTheme" style="width:100%; margin-bottom:15px; padding:10px; border: 1px solid #888; border-radius: 4px; color: #000000 !important; background: #ffffff !important;">
+      <option value="Technical">Technical</option>
+      <option value="Workshop">Workshop</option>
+      <option value="Culturals">Culturals</option>
+      <option value="Sports">Sports</option>
+    </select>
+
+    <!-- 3. Start & End Time -->
+    <label style="color: #222222 !important; font-weight: bold; display: block; margin-bottom: 5px;">3. Start Time & End Time:</label>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+      <input type="datetime-local" id="formStartTime" style="width:50%; padding:10px; border: 1px solid #888; border-radius: 4px; color: #000000 !important; background: #ffffff !important;">
+      <input type="datetime-local" id="formEndTime" style="width:50%; padding:10px; border: 1px solid #888; border-radius: 4px; color: #000000 !important; background: #ffffff !important;">
+    </div>
+
+    <!-- 4. Event Venue -->
+    <label style="color: #222222 !important; font-weight: bold; display: block; margin-bottom: 5px;">4. Event Venue:</label>
+    <input type="text" id="formVenue" style="width:100%; margin-bottom:15px; padding:10px; border: 1px solid #888; border-radius: 4px; color: #000000 !important; background: #ffffff !important;" placeholder="Enter venue details" required>
+
+    <!-- 5. Entry Fees Check -->
+    <label style="color: #222222 !important; font-weight: bold; display: block; margin-bottom: 5px;">5. Entry Fees Irukka?</label>
+    <select id="formHasFee" style="width:100%; margin-bottom:15px; padding:10px; border: 1px solid #888; border-radius: 4px; color: #000000 !important; background: #ffffff !important;" onchange="toggleFeeInput()">
+      <option value="No">No (Free Entry)</option>
+      <option value="Yes">Yes (Paid)</option>
+    </select>
+
+    <!-- 6. Entry Fee Amount (Hidden by default) -->
+    <div id="feeAmountContainer" style="display: none;">
+      <label style="color: #222222 !important; font-weight: bold; display: block; margin-bottom: 5px;">6. Entry Fee Amount (Rs):</label>
+      <input type="number" id="formFeeAmount" style="width:100%; margin-bottom:15px; padding:10px; border: 1px solid #888; border-radius: 4px; color: #000000 !important; background: #ffffff !important;" value="0" placeholder="Enter amount">
+    </div>
+
+    <!-- 7. Total Student Limit -->
+    <label style="color: #222222 !important; font-weight: bold; display: block; margin-bottom: 5px;">7. Total Student Limit:</label>
+    <input type="number" id="formStudentLimit" style="width:100%; margin-bottom:20px; padding:10px; border: 1px solid #888; border-radius: 4px; color: #000000 !important; background: #ffffff !important;" placeholder="Maximum students count" required>
+
+    <!-- 8. Action Buttons -->
+    <div style="text-align: right;">
+      <button type="button" onclick="closeEventModal()" style="padding: 10px 15px; background: #aaa; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;">Cancel</button>
+      <button type="button" id="saveEventBtn" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Save Event</button>
+    </div>
+
+  </div>
+</div>
 </body>
 </html>

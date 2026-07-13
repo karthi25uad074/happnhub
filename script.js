@@ -1,66 +1,4 @@
-const events = [
-  {
-    id: 1,
-    title: "CodeSprint 2026",
-    category: "Technical",
-    date: "18 JUL",
-    time: "9:00 AM",
-    venue: "CSE Block, Lab 3",
-    organizer: "Coding Club",
-    description: "A 6-hour competitive coding challenge for students who love solving problems.",
-  },
-  {
-    id: 2,
-    title: "UI/UX Design Workshop",
-    category: "Workshop",
-    date: "20 JUL",
-    time: "10:30 AM",
-    venue: "Innovation Hall",
-    organizer: "Design Club",
-    description: "Learn how to create simple, user-friendly mobile and web interfaces using Figma.",
-  },
-  {
-    id: 3,
-    title: "Rhythm Night",
-    category: "Cultural",
-    date: "23 JUL",
-    time: "5:30 PM",
-    venue: "Open Auditorium",
-    organizer: "Cultural Committee",
-    description: "An evening of music, dance, and student performances from across the campus.",
-  },
-  {
-    id: 4,
-    title: "Inter-Department Football",
-    category: "Sports",
-    date: "25 JUL",
-    time: "4:00 PM",
-    venue: "College Ground",
-    organizer: "Sports Club",
-    description: "Cheer for your department in the annual knockout football tournament.",
-  },
-  {
-    id: 5,
-    title: "Build Your First Website",
-    category: "Workshop",
-    date: "27 JUL",
-    time: "2:00 PM",
-    venue: "IT Seminar Hall",
-    organizer: "Web Club",
-    description: "A beginner-friendly hands-on session to build and publish your first website.",
-  },
-  {
-    id: 6,
-    title: "Hack the Campus",
-    category: "Technical",
-    date: "30 JUL",
-    time: "8:00 AM",
-    venue: "Main Block",
-    organizer: "Innovation Cell",
-    description: "A campus hackathon where teams build solutions for real student problems.",
-  },
-];
-
+let events = JSON.parse(localStorage.getItem('hhEvents')) || [];
 const eventGrid = document.getElementById("eventGrid");
 const savedEventsContainer = document.getElementById("savedEvents");
 const searchInput = document.getElementById("searchInput");
@@ -201,3 +139,83 @@ eventModal.addEventListener("click", (event) => {
 
 renderEvents();
 renderSavedEvents();
+// --- 1. POPUP OPEN / CLOSE LOGIC ---
+
+// Unga admin panel "Add" button click panna idhu trigger aaganum:
+function openAddEventModal() {
+    document.getElementById('eventModal').style.display = 'flex';
+}
+
+function closeEventModal() {
+    document.getElementById('eventModal').style.display = 'none';
+    // Reset inputs
+    document.getElementById('formEventName').value = '';
+    document.getElementById('formVenue').value = '';
+    document.getElementById('formStudentLimit').value = '';
+    document.getElementById('formHasFee').value = 'No';
+    document.getElementById('feeAmountContainer').style.display = 'none';
+    document.getElementById('formFeeAmount').value = '0';
+}
+
+// Fees select panna matum amount field-ah kaata intha function:
+function toggleFeeInput() {
+    const hasFee = document.getElementById('formHasFee').value;
+    const feeContainer = document.getElementById('feeAmountContainer');
+    if (hasFee === 'Yes') {
+        feeContainer.style.display = 'block';
+    } else {
+        feeContainer.style.display = 'none';
+        document.getElementById('formFeeAmount').value = '0';
+    }
+}
+
+// --- 2. DATA SAVE & UPLOAD LOGIC ---
+
+document.getElementById('saveEventBtn').addEventListener('click', function() {
+    // Collect values from form
+    const name = document.getElementById('formEventName').value;
+    const theme = document.getElementById('formEventTheme').value;
+    const startTime = document.getElementById('formStartTime').value;
+    const endTime = document.getElementById('formEndTime').value;
+    const venue = document.getElementById('formVenue').value;
+    const hasFee = document.getElementById('formHasFee').value;
+    const feeAmount = document.getElementById('formFeeAmount').value;
+    const studentLimit = document.getElementById('formStudentLimit').value;
+
+    // Basic validation check
+    if(!name || !venue || !studentLimit) {
+        alert("Boss! Ella mandatory fields-ayum fill pannunga.");
+        return;
+    }
+
+    // New event object creation
+    const newEvent = {
+        id: Date.now(), // Unique ID matching timestamp
+        name: name,
+        theme: theme,
+        startTime: startTime,
+        endTime: endTime,
+        venue: venue,
+        entryFee: hasFee === 'Yes' ? `Rs. ${feeAmount}` : 'Free Entry',
+        limit: studentLimit
+    };
+
+    // Push new event into our main events array
+    events.push(newEvent);
+
+    // Save to browser live local storage
+    localStorage.setItem('hhEvents', JSON.stringify(events));
+
+    // Success alert
+    alert("Mass boss! New event website la upload aayidichu!");
+
+    // Close popup
+    closeEventModal();
+
+    // Call your existing function that displays data on screen (Example: displayEvents())
+    if (typeof displayEvents === "function") {
+        displayEvents(); 
+    } else {
+        location.reload(); // Re-render logic illa na page auto reload panni screen update aagum
+    }
+});
