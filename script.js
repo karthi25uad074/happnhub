@@ -441,3 +441,173 @@ function executeEventDeletion() {
         }
     }
 }
+// ==========================================
+// SAFE INJECTED EDIT SUBSYSTEM
+// ==========================================
+var mySafeEditEventId = null;
+
+function openEditSelectModal() {
+    const editModal = document.getElementById('newEditSelectModal');
+    const listContainer = document.getElementById('editEventListContainer');
+    if (!editModal || !listContainer) return;
+
+    listContainer.innerHTML = '';
+    mySafeEditEventId = null;
+
+    let currentEvents = (typeof events !== 'undefined') ? events : ((typeof allEvents !== 'undefined') ? allEvents : []);
+
+    if (currentEvents.length === 0) {
+        listContainer.innerHTML = '<p style="color: #666; text-align: center; margin: 10px 0;">No active events found to edit, boss!</p>';
+        editModal.style.display = 'flex';
+        return;
+    }
+
+    currentEvents.forEach(event => {
+        const itemRow = document.createElement('div');
+        itemRow.style.padding = '10px';
+        itemRow.style.borderBottom = '1px solid #eee';
+        itemRow.style.display = 'flex';
+        itemRow.style.alignItems = 'center';
+        itemRow.style.gap = '10px';
+        itemRow.style.cursor = 'pointer';
+        
+        itemRow.onclick = function() {
+            const radio = itemRow.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
+                mySafeEditEventId = event.id;
+                Array.from(listContainer.children).forEach(child => child.style.background = 'transparent');
+                itemRow.style.background = '#fff9e6'; // Warm yellow tone highlight
+            }
+        };
+
+        itemRow.innerHTML = `
+            <input type="radio" name="editTargetEvent" value="${event.id}" style="cursor: pointer;">
+            <div style="flex: 1;">
+                <strong style="display: block; color: #333;">${event.title || event.name || 'Untitled'}</strong>
+                <span style="font-size: 12px; color: #666;">📍 Venue: ${event.venue || 'N/A'}</span>
+            </div>
+        `;
+        listContainer.appendChild(itemRow);
+    });
+
+    editModal.style.display = 'flex';
+}
+
+function closeEditSelectModal() {
+    const editModal = document.getElementById('newEditSelectModal');
+    if (editModal) editModal.style.display = 'none';
+}
+
+// TOGGLE FUNCTION FOR EDIT ENTRY FORM FEES
+function toggleEditFeeField() {
+    const hasFee = document.getElementById('editPopupHasFee').value;
+    const feeContainer = document.getElementById('editPopupFeeAmountContainer');
+    if (hasFee === 'Yes') {
+        feeContainer.style.display = 'block';
+    } else {
+        feeContainer.style.display = 'none';
+        document.getElementById('editPopupFeeAmount').value = '0';
+    }
+}
+
+// ➡️ NEXT ACTION: RENDER ALREADY POPULATED VALUES
+function openActualEditForm() {
+    if (!mySafeEditEventId) {
+        alert("Boss! First ethavathu oru event-ah select pannunga!");
+        return;
+    }
+
+    let currentEvents = (typeof events !== 'undefined') ? events : ((typeof allEvents !== 'undefined') ? allEvents : []);
+    const targetObj = currentEvents.find(item => item.id === mySafeEditEventId);
+
+    if (!targetObj) {
+        alert("Target event object error!");
+        return;
+    }
+
+    // Load pre-configured data accurately into input boxes
+    document.getElementById('editPopupEventName').value = targetObj.title || targetObj.name || '';
+    document.getElementById('editPopupEventCategory').value = targetObj.category || 'Technical';
+    document.getElementById('editPopupEventVenue').value = targetObj.venue || '';
+    document.getElementById('editPopupEventLimit').value = targetObj.limit || '';
+
+    // Split times cleanly from string pattern '09:00 - 17:00'
+    if (targetObj.time && targetObj.time.includes(' - ')) {
+        const parts = targetObj.time.split(' - ');
+        document.getElementById('editPopupStartTime').value = parts[0].trim();
+        document.getElementById('editPopupEndTime').value = parts[1].trim();
+    } else {
+        document.getElementById('editPopupStartTime').value = '';
+        document.getElementById('editPopupEndTime').value = '';
+    }
+
+    // Auto check if previous registration was a paid model
+    const feeStr = targetObj.entryFee || '';
+    if (feeStr && (feeStr.includes('Rs.') || parseInt(feeStr) > 0)) {
+        document.getElementById('editPopupHasFee').value = 'Yes';
+        document.getElementById('editPopupFeeAmountContainer').style.display = 'block';
+        document.getElementById('editPopupFeeAmount').value = feeStr.replace(/[^0-9]/g, '');
+    } else {
+        document.getElementById('editPopupHasFee').value = 'No';
+        document.getElementById('editPopupFeeAmountContainer').style.display = 'none';
+        document.getElementById('editPopupFeeAmount').value = '0';
+    }
+
+    // Modal view swap transitions
+    closeEditSelectModal();
+    document.getElementById('newEditFormModal').style.display = 'flex';
+}
+
+function closeEditFormModal() {
+    const formModal = document.getElementById('newEditFormModal');
+    if (formModal) formModal.style.display = 'none';
+    mySafeEditEventId = null;
+}
+
+// 💾 FINAL BACKEND COMPACTION ENGINE ON SAVE
+function saveEditedEventChanges() {
+    const name = document.getElementById('editPopupEventName').value.trim();
+    const category = document.getElementById('editPopupEventCategory').value;
+    const startTime = document.getElementById('editPopupStartTime').value;
+    const endTime = document.getElementById('editPopupEndTime').value;
+    const venue = document.getElementById('editPopupEventVenue').value.trim();
+    const hasFee = document.getElementById('editPopupHasFee').value;
+    const feeAmount = document.getElementById('editPopupFeeAmount').value;
+    const limit = document.getElementById('editPopupEventLimit').value;
+
+    if (!name || !venue || !limit || !startTime || !endTime) {
+        alert("Boss! Fields fill pannaama update seiya mudiyathu!");
+        return;
+    }
+
+    const finalFeeStr = (hasFee === 'Yes') ? `Rs. ${feeAmount}` : 'Free Entry';
+
+    // Map object sync mutations across core configurations arrays
+    const mutateHandler = (item) => {
+        if (item.id === mySafeEditEventId) {
+            item.title = name;
+            item.name = name; // dual-property assurance layout mapping
+            item.category = category;
+            item.time = `${startTime} - ${endTime}`;
+            item.venue = venue;
+            item.entryFee = finalFeeStr;
+            item.limit = limit;
+            item.description = `Theme: ${category} | Max Limit: ${limit} Students | Entry: ${finalFeeStr}`;
+        }
+        return item;
+    };
+
+    if (typeof events !== 'undefined') {
+        events = events.map(mutateHandler);
+        localStorage.setItem('hhEvents', JSON.stringify(events));
+    }
+    if (typeof allEvents !== 'undefined') {
+        allEvents = allEvents.map(mutateHandler);
+        localStorage.setItem('hhEvents', JSON.stringify(allEvents));
+    }
+
+    alert("Mass boss! Event changes saved successfully.");
+    closeEditFormModal();
+    location.reload();
+}

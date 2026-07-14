@@ -15,7 +15,7 @@
       ➕ Add Event
     </button>
     <button class="admin-btn"
-      style="display: none; padding: 10px 20px; font-size: 16px; background-color: #ffc107; color: black; border: none; border-radius: 5px; cursor: pointer; margin: 5px; font-weight: bold;">
+      style="display: none; padding: 10px 20px; font-size: 16px; background-color: #ffc107; color: black; border: none; border-radius: 5px; cursor: pointer; margin: 5px; font-weight: bold;"onclick="openEditSelectModal()">
       ✏️ Edit Event
     </button>
     <button class="admin-btn"
@@ -267,6 +267,83 @@
         <div style="text-align: right; border-top: 2px solid #eee; padding-top: 15px;">
             <button onclick="closeDeleteModal()" style="padding: 10px 15px; background: #bbb; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 8px; font-weight: bold;">Cancel</button>
             <button onclick="executeEventDeletion()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">❌ Delete Selected</button>
+        </div>
+    </div>
+</div>
+<!-- 1. EDIT SELECTION LIST MODAL -->
+<div id="newEditSelectModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 999999; justify-content: center; align-items: center; font-family: sans-serif;">
+    <div style="background: white; padding: 25px; border-radius: 12px; width: 400px; color: black; max-height: 80vh; overflow-y: auto;">
+        <h3 style="margin-top: 0; color: #ffc107; border-bottom: 2px solid #eee; padding-bottom: 10px;">✏️ Select Event to Edit</h3>
+        <p style="font-weight: bold; margin-bottom: 10px; color: #333;">Choose an Event to Modify:</p>
+        
+        <div id="editEventListContainer" style="border: 1px solid #ccc; border-radius: 6px; max-height: 250px; overflow-y: auto; padding: 10px; margin-bottom: 20px; background: #f9f9f9;">
+            <!-- Events list generated dynamically -->
+        </div>
+
+        <div style="text-align: right; border-top: 2px solid #eee; padding-top: 15px;">
+            <button onclick="closeEditSelectModal()" style="padding: 10px 15px; background: #bbb; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 8px; font-weight: bold;">Cancel</button>
+            <button onclick="openActualEditForm()" style="padding: 10px 20px; background: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Next ➡️</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. ACTUAL EDIT FORM MODAL (DATA POPULATED FORM) -->
+<div id="newEditFormModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 999999; justify-content: center; align-items: center; font-family: sans-serif;">
+    <div style="background: white; padding: 25px; border-radius: 12px; width: 400px; color: black; max-height: 85vh; overflow-y: auto;">
+        <h3 style="margin-top: 0; color: #ffc107; border-bottom: 2px solid #eee; padding-bottom: 10px;">Modify Event Details</h3>
+        
+        <div style="margin-bottom: 12px;">
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">Event Name *</label>
+            <input type="text" id="editPopupEventName" style="width: 95%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">Event Theme/Category *</label>
+            <select id="editPopupEventCategory" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="Technical">Technical</option>
+                <option value="Workshop">Workshop</option>
+                <option value="Cultural">Cultural</option>
+                <option value="Sports">Sports</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 12px; display: flex; gap: 10px;">
+            <div style="flex: 1;">
+                <label style="display:block; font-weight:bold; margin-bottom:5px;">Start Time *</label>
+                <input type="time" id="editPopupStartTime" style="width: 90%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="flex: 1;">
+                <label style="display:block; font-weight:bold; margin-bottom:5px;">End Time *</label>
+                <input type="time" id="editPopupEndTime" style="width: 90%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">Event Venue *</label>
+            <input type="text" id="editPopupEventVenue" style="width: 95%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+
+        <div style="margin-bottom: 12px; background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #eaeaea;">
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">Entry Fee Status *</label>
+            <select id="editPopupHasFee" onchange="toggleEditFeeField()" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 8px;">
+                <option value="No">Free Entry (No Fee)</option>
+                <option value="Yes">Paid Event (Has Fee)</option>
+            </select>
+            
+            <div id="editPopupFeeAmountContainer" style="display: none;">
+                <label style="display:block; font-weight:bold; margin-bottom:5px;">Fee Amount (Rs.) *</label>
+                <input type="number" id="editPopupFeeAmount" min="0" style="width: 90%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">Total Student Limit *</label>
+            <input type="number" id="editPopupEventLimit" min="1" style="width: 95%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+
+        <div style="text-align: right; border-top: 2px solid #eee; padding-top: 15px;">
+            <button onclick="closeEditFormModal()" style="padding: 10px 15px; background: #bbb; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 8px; font-weight: bold;">Cancel</button>
+            <button onclick="saveEditedEventChanges()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">💾 Update Event</button>
         </div>
     </div>
 </div>
