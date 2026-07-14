@@ -339,3 +339,105 @@ function saveMyEvent() {
         alert("Critical Error: Core application system configuration is missing!");
     }
 }
+// ==========================================
+// SAFE INJECTED DELETE SUBSYSTEM (CRASH-PROOF)
+// ==========================================
+
+// Intha variable-ah safe-a function-ku mela define panrom
+var mySafeDeleteEventId = null;
+
+function openDeleteEventModal() {
+    const deleteModal = document.getElementById('newDeleteEventModal');
+    const listContainer = document.getElementById('deleteEventListContainer');
+    
+    if (!deleteModal || !listContainer) {
+        alert("HTML-la Modal div block adiyila illai boss!");
+        return;
+    }
+    
+    // Clear previous view state safely
+    listContainer.innerHTML = '';
+    mySafeDeleteEventId = null;
+
+    // Check application dynamic state reference safely 
+    // (Unga script-la variable per 'events' illana 'allEvents'-a nu check panrom)
+    let currentActiveEvents = [];
+    if (typeof events !== 'undefined') {
+        currentActiveEvents = events;
+    } else if (typeof allEvents !== 'undefined') {
+        currentActiveEvents = allEvents;
+    } else {
+        listContainer.innerHTML = '<p style="color: red; text-align: center;">Core database array missing!</p>';
+        deleteModal.style.display = 'flex';
+        return;
+    }
+
+    if (currentActiveEvents.length === 0) {
+        listContainer.innerHTML = '<p style="color: #666; text-align: center; margin: 10px 0;">No active events found to delete, boss!</p>';
+        deleteModal.style.display = 'flex';
+        return;
+    }
+
+    // Render system cards with robust identification mapping
+    currentActiveEvents.forEach(event => {
+        const itemRow = document.createElement('div');
+        itemRow.style.padding = '10px';
+        itemRow.style.borderBottom = '1px solid #eee';
+        itemRow.style.display = 'flex';
+        itemRow.style.alignItems = 'center';
+        itemRow.style.gap = '10px';
+        itemRow.style.cursor = 'pointer';
+        
+        itemRow.onclick = function() {
+            const radio = itemRow.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
+                mySafeDeleteEventId = event.id;
+                Array.from(listContainer.children).forEach(child => child.style.background = 'transparent');
+                itemRow.style.background = '#ffebeb';
+            }
+        };
+
+        itemRow.innerHTML = `
+            <input type="radio" name="deleteTargetEvent" value="${event.id}" style="cursor: pointer;">
+            <div style="flex: 1;">
+                <strong style="display: block; color: #333;">${event.title || event.name || 'Untitled Event'}</strong>
+                <span style="font-size: 12px; color: #666;">📍 Venue: ${event.venue || 'N/A'}</span>
+            </div>
+        `;
+        listContainer.appendChild(itemRow);
+    });
+
+    deleteModal.style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    const deleteModal = document.getElementById('newDeleteEventModal');
+    if (deleteModal) deleteModal.style.display = 'none';
+    mySafeDeleteEventId = null;
+}
+
+function executeEventDeletion() {
+    if (!mySafeDeleteEventId) {
+        alert("Boss! First ethavathu oru event-ah select pannunga!");
+        return;
+    }
+
+    if (confirm("Are you sure you want to completely remove this event?")) {
+        if (typeof events !== 'undefined') {
+            events = events.filter(item => item.id !== mySafeDeleteEventId);
+            localStorage.setItem('hhEvents', JSON.stringify(events));
+            alert("Done boss! Event removed successfully.");
+            closeDeleteModal();
+            location.reload();
+        } else if (typeof allEvents !== 'undefined') {
+            allEvents = allEvents.filter(item => item.id !== mySafeDeleteEventId);
+            localStorage.setItem('hhEvents', JSON.stringify(allEvents));
+            alert("Done boss! Event removed successfully.");
+            closeDeleteModal();
+            location.reload();
+        } else {
+            alert("Error syncing database modifications!");
+        }
+    }
+}
