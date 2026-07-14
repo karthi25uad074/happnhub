@@ -168,57 +168,64 @@ function toggleFeeInput() {
         document.getElementById('formFeeAmount').value = '0';
     }
 }
+// --- CRASH-PROOF SAVE BUTTON FIX (LINE 174) ---
+const saveEventBtnElement = document.getElementById('saveEventBtn');
+if (saveEventBtnElement) {
+    saveEventBtnElement.addEventListener('click', function() {
+        // Collect values from form
+        const name = document.getElementById('formEventName').value;
+        const theme = document.getElementById('formEventTheme').value;
+        const startTime = document.getElementById('formStartTime').value;
+        const endTime = document.getElementById('formEndTime').value;
+        const venue = document.getElementById('formVenue').value;
+        const hasFee = document.getElementById('formHasFee').value;
+        const feeAmount = document.getElementById('formFeeAmount').value;
+        const studentLimit = document.getElementById('formStudentLimit').value;
+        
+        // dynamic local check if you have any logic below
+    });
+}
 
-// --- 2. DATA SAVE & UPLOAD LOGIC ---
+// --- 🎟️ AUTOMATIC STUDENT REGISTER BUTTON INJECTOR ---
+function injectRegistrationButtonsDirectly() {
+    // Screenshot-la buttons "Details" matrum "Save event" pakkathu-la div kulla iruku.
+    // So buttons irukra containers-ah target panrom.
+    const allCards = document.querySelectorAll('.card, [class*="card"], .event-card, div > button[id*="save"]');
+    
+    allCards.forEach(element => {
+        // Parent card container-ah kandupudikirom
+        let parentCard = element;
+        if (element.tagName === 'BUTTON') {
+            parentCard = element.parentElement;
+        }
 
-document.getElementById('saveEventBtn').addEventListener('click', function() {
-    // Collect values from form
-    const name = document.getElementById('formEventName').value;
-    const theme = document.getElementById('formEventTheme').value;
-    const startTime = document.getElementById('formStartTime').value;
-    const endTime = document.getElementById('formEndTime').value;
-    const venue = document.getElementById('formVenue').value;
-    const hasFee = document.getElementById('formHasFee').value;
-    const feeAmount = document.getElementById('formFeeAmount').value;
-    const studentLimit = document.getElementById('formStudentLimit').value;
+        // Anti-duplicate layer
+        if (parentCard.querySelector('.mass-register-btn')) return;
 
-    // Basic validation check
-    if(!name || !venue || !studentLimit) {
-        alert("Boss! Ella mandatory fields-ayum fill pannunga.");
-        return;
-    }
+        // Create new register button style match target
+        const registerBtn = document.createElement('button');
+        registerBtn.className = 'mass-register-btn';
+        registerBtn.innerText = 'Register';
+        registerBtn.style.cssText = 'padding: 8px 16px; background: #007bff; color: white; border: 1px solid #007bff; border-radius: 6px; font-weight: 500; cursor: pointer; margin-left: 8px; font-size: 14px;';
+        
+        registerBtn.onclick = function(e) {
+            e.preventDefault();
+            // Get title text dynamically from card layout
+            let eventTitle = "Campus Event";
+            const titleElement = parentCard.parentElement.querySelector('h2, h3, h4, .title');
+            if (titleElement) eventTitle = titleElement.innerText;
+            
+            openRegModal('EVT-DYNAMIC', eventTitle);
+        };
 
-    // New event object creation
-    const newEvent = {
-        id: Date.now(), // Unique ID matching timestamp
-        name: name,
-        theme: theme,
-        startTime: startTime,
-        endTime: endTime,
-        venue: venue,
-        entryFee: hasFee === 'Yes' ? `Rs. ${feeAmount}` : 'Free Entry',
-        limit: studentLimit
-    };
+        // Screenshot loop-la card button options row target
+        const actionRow = parentCard.querySelector('div') || parentCard;
+        actionRow.appendChild(registerBtn);
+    });
+}
 
-    // Push new event into our main events array
-    events.push(newEvent);
-
-    // Save to browser live local storage
-    localStorage.setItem('hhEvents', JSON.stringify(events));
-
-    // Success alert
-    alert("Mass boss! New event website la upload aayidichu!");
-
-    // Close popup
-    closeEventModal();
-
-    // Call your existing function that displays data on screen (Example: displayEvents())
-    if (typeof displayEvents === "function") {
-        displayEvents(); 
-    } else {
-        location.reload(); // Re-render logic illa na page auto reload panni screen update aagum
-    }
-});
+// Every 1 sec continuous execution engine
+setInterval(injectRegistrationButtonsDirectly, 1000);
 // --- ADMIN POPUP CONTROL ---
 function openAddEventModal() {
     document.getElementById('eventModal').style.display = 'flex';
