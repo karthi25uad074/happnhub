@@ -219,8 +219,7 @@ document.getElementById('saveEventBtn').addEventListener('click', function() {
         location.reload(); // Re-render logic illa na page auto reload panni screen update aagum
     }
 });
-// --- NEW CLEAN EVENT LOGIC ---
-
+// --- ADMIN POPUP CONTROL ---
 function openAddEventModal() {
     document.getElementById('eventModal').style.display = 'flex';
 }
@@ -229,35 +228,114 @@ function closeEventModal() {
     document.getElementById('eventModal').style.display = 'none';
 }
 
-function toggleFeeInput() {
-    const hasFee = document.getElementById('formHasFee').value;
-    const feeContainer = document.getElementById('feeAmountContainer');
-    if (hasFee === 'Yes') {
-        feeContainer.style.display = 'block';
-    } else {
-        feeContainer.style.display = 'none';
-    }
-}
-
+// --- SAVE LOGIC ---
 document.getElementById('saveEventBtn').addEventListener('click', function() {
     const name = document.getElementById('formEventName').value;
     const venue = document.getElementById('formVenue').value;
-    const studentLimit = document.getElementById('formStudentLimit').value;
+    const limit = document.getElementById('formStudentLimit').value;
 
-    if(!name || !venue || !studentLimit) {
+    if(!name || !venue || !limit) {
         alert("Ella fields-um fill pannunga boss!");
         return;
     }
 
-    // Direct push
     const newEvent = {
-        name: name,
-        theme: document.getElementById('formEventTheme').value,
-        venue: venue
+        id: Date.now(),
+        title: name,
+        venue: venue,
+        category: "Technical", // Default
+        date: "2026-07-15",
+        time: "10:00 AM",
+        organizer: "Admin",
+        description: "New Event"
     };
-    if (typeof events !== 'undefined') { events.push(newEvent); } else { var events = [newEvent]; }
+
+    events.push(newEvent); 
     localStorage.setItem('hhEvents', JSON.stringify(events));
     
     alert("Event saved!");
     location.reload();
 });
+// --- ADMIN POPUP SYSTEM CONTROL ---
+function openAddEventModal() {
+    const targetModal = document.getElementById('newAddEventModal');
+    if (targetModal) targetModal.style.display = 'flex';
+}
+
+function closeMyModal() {
+    const targetModal = document.getElementById('newAddEventModal');
+    if (targetModal) {
+        targetModal.style.display = 'none';
+        // Reset dynamic elements
+        document.getElementById('popupEventName').value = '';
+        document.getElementById('popupEventVenue').value = '';
+        document.getElementById('popupEventLimit').value = '';
+        document.getElementById('popupStartTime').value = '';
+        document.getElementById('popupEndTime').value = '';
+        document.getElementById('popupHasFee').value = 'No';
+        document.getElementById('popupFeeAmount').value = '0';
+        document.getElementById('popupFeeAmountContainer').style.display = 'none';
+    }
+}
+
+// Fees toggle function (Yes sonna amount box varum)
+function toggleFeeField() {
+    const hasFee = document.getElementById('popupHasFee').value;
+    const feeContainer = document.getElementById('popupFeeAmountContainer');
+    if (hasFee === 'Yes') {
+        feeContainer.style.display = 'block';
+    } else {
+        feeContainer.style.display = 'none';
+        document.getElementById('popupFeeAmount').value = '0';
+    }
+}
+
+// --- REQUIREMENT BASED DATA EXTRACTION & LIVE INJECTION ---
+function saveMyEvent() {
+    // Value capturing
+    const name = document.getElementById('popupEventName').value.trim();
+    const category = document.getElementById('popupEventCategory').value;
+    const startTime = document.getElementById('popupStartTime').value;
+    const endTime = document.getElementById('popupEndTime').value;
+    const venue = document.getElementById('popupEventVenue').value.trim();
+    const hasFee = document.getElementById('popupHasFee').value;
+    const feeAmount = document.getElementById('popupFeeAmount').value;
+    const limit = document.getElementById('popupEventLimit').value;
+
+    // Strict validation verification
+    if (!name || !venue || !limit || !startTime || !endTime) {
+        alert("Boss! Ella fields-ayum correct-a fill pannunga!");
+        return;
+    }
+
+    // Process fee formatting string
+    const finalFeeStr = (hasFee === 'Yes') ? `Rs. ${feeAmount}` : 'Free Entry';
+
+    // Formulating matching object with your original application state properties
+    const structuredEvent = {
+        id: Date.now(),
+        title: name,
+        category: category,
+        time: `${startTime} - ${endTime}`,
+        venue: venue,
+        entryFee: finalFeeStr, 
+        limit: limit,
+        date: "2026-07-15",   
+        organizer: "Admin Controller",
+        description: `Theme: ${category} | Max Limit: ${limit} Students | Entry: ${finalFeeStr}`
+    };
+
+    // Pushing into runtime global 'events' array structure safely
+    if (typeof events !== 'undefined') {
+        events.push(structuredEvent);
+        localStorage.setItem('hhEvents', JSON.stringify(events));
+        
+        alert("Mass Boss! Event successfully uploaded to HappnHub!");
+        closeMyModal();
+        
+        // Re-rendering page natively to immediately paint layout cards
+        location.reload();
+    } else {
+        alert("Critical Error: Core application system configuration is missing!");
+    }
+}
