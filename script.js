@@ -181,6 +181,8 @@ if (saveEventBtnElement) {
         const hasFee = document.getElementById('formHasFee').value;
         const feeAmount = document.getElementById('formFeeAmount').value;
         const studentLimit = document.getElementById('formStudentLimit').value;
+        const eventDateVal = document.getElementById('formEventDate').value; 
+        const regEndTimeVal = document.getElementById('formRegEndTime').value;
         
         // dynamic local check if you have any logic below
     });
@@ -618,174 +620,265 @@ function saveEditedEventChanges() {
     closeEditFormModal();
     location.reload();
 }
-// ===================================================
-// ULTIMATE MUTATION OBSERVER REGISTRATION ENGINE
-// ===================================================
+// =================================================================
+// 🔥 UPGRADED ADVANCED MUTATION ENGINE: SEATS & AUTO-DEADLINE LOOKUP
+// =================================================================
 
 function forceInjectRegButtons() {
-    // HTML-ல கார்டா இருக்க வாய்ப்புள்ள எல்லா செலக்டரையும் ஒரே நேரத்துல தேடுது
-    const allCards = document.querySelectorAll('.event-card, [id^="event-"], .card, .events-container > div, .events-grid > div, [class*="card"]');
-    
-    allCards.forEach((card) => {
-        // ஏற்கனவே பட்டன் இருந்தா விட்டுடும், இல்லனா மட்டும் தான் ஆட் பண்ணும்
-        if (card.querySelector('.btn-custom-register')) return;
+    const allCards = document.querySelectorAll('.event-card, [id^="event-"], .card, .events-container > div, .events-grid > div, [class*="card"]');
+    
+    allCards.forEach((card) => {
+        // Anti-duplicate layers check
+        if (card.querySelector('.btn-custom-register') || card.querySelector('.reg-status-badge')) return;
 
-        // கார்டுல இருந்து டைட்டிலை எடுக்குது
-        let eventTitle = "Campus Event";
-        const heading = card.querySelector('h3, h4, .event-title, .title, strong');
-        if (heading) {
-            eventTitle = heading.innerText.trim();
-        } else {
-            eventTitle = card.innerText.split('\n')[0].trim();
-        }
+        // 1. EXTRACT DATA PROPERTY VALUES FROM CARD
+        let eventTitle = "Campus Event";
+        const heading = card.querySelector('h3, h4, .event-title, .title, strong');
+        if (heading) {
+            eventTitle = heading.innerText.trim();
+        } else {
+            eventTitle = card.innerText.split('\n')[0].trim();
+        }
 
-        let eventId = card.getAttribute('data-id') || card.id || "EVT-" + encodeURIComponent(eventTitle).substring(0, 10);
+        let eventId = card.getAttribute('data-id') || card.id || "EVT-" + encodeURIComponent(eventTitle).substring(0, 10);
 
-        // --- REGISTER BUTTON CREATION ---
-        const regBtn = document.createElement('button');
-        regBtn.className = 'btn-custom-register';
-        regBtn.innerText = '🎟️ Register Now';
-        
-        // CSS Force Injection (மாணவர் லாகினிலும் பிரம்மாண்டமாக தெரிய)
-        regBtn.style.cssText = 'width: 90%; margin: 12px auto; display: block; padding: 10px 15px; background: #007bff; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; text-align: center; z-index: 999; box-shadow: 0 2px 5px rgba(0,0,0,0.15);';
-        
-        regBtn.onmouseover = () => regBtn.style.background = '#0056b3';
-        regBtn.onmouseout = () => regBtn.style.background = '#007bff';
-        
-        regBtn.onclick = function(e) {
-            e.preventDefault();
-            e.stopPropagation(); // கோர் ஃபங்ஷன்களை கிராஷ் செய்யாமல் தடுக்கும்
-            openRegModal(eventId, eventTitle);
-        };
+        // 2. REAL-TIME LOCAL STORAGE SEAT TRACKER
+        let allRegs = JSON.parse(localStorage.getItem('hhRegistrations')) || [];
+        let currentRegCount = allRegs.filter(reg => reg.eventId === eventId).length;
 
-        // கார்டுக்குள்ள 'Save' அல்லது 'View Details' பட்டன் இருந்தா அதுக்கு பக்கத்துல வைக்கும்
-        const existingBtn = card.querySelector('button, .btn');
-        if (existingBtn && existingBtn !== regBtn) {
-            existingBtn.parentNode.insertBefore(regBtn, existingBtn.nextSibling);
-        } else {
-            card.appendChild(regBtn);
-        }
-    });
+        // Max limit processing lookup (card attribute-la irundhu edukum, illena 50 limit default)
+        let maxLimit = parseInt(card.getAttribute('data-limit')) || 50; 
+        let seatsLeft = maxLimit - currentRegCount;
+
+        // 3. REGISTRATION DEADLINE CALCULATOR ENGINE
+        let regEndStr = card.getAttribute('data-reg-end') || card.getAttribute('data-event-date'); 
+        let isTimeExpired = false;
+        
+        if (regEndStr) {
+            let deadline = new Date(regEndStr);
+            let now = new Date();
+            if (now > deadline) {
+                isTimeExpired = true;
+            }
+        }
+
+        // 4. DESIGN SEAT COUNTER LABELS Dynamic UI Insertion
+        if (!card.querySelector('.seat-counter-lbl')) {
+            const seatIndicator = document.createElement('div');
+            seatIndicator.className = 'seat-counter-lbl';
+            seatIndicator.style.cssText = 'font-size: 13px; font-weight: bold; margin: 8px auto; text-align: center; font-family: sans-serif; width: 90%;';
+            
+            if (seatsLeft <= 0) {
+                seatIndicator.innerHTML = `⚠️ <span style="color: #dc3545;">Seats Full (0/${maxLimit})</span>`;
+            } else {
+                seatIndicator.innerHTML = `🎟️ <span style="color: #28a745;">Seats Left: ${seatsLeft}/${maxLimit}</span>`;
+            }
+            card.appendChild(seatIndicator);
+        }
+
+        // 5. CONDITIONAL RENDER PIPELINE ACTION ROW
+        const existingBtn = card.querySelector('button, .btn, .btn-custom-register');
+        
+        if (isTimeExpired) {
+            // Case A: Timeout scenario -> Injection Closed Warning
+            const timeoutBadge = document.createElement('span');
+            timeoutBadge.className = 'reg-status-badge';
+            timeoutBadge.innerText = '🚫 Registration Closed (Timeout)';
+            timeoutBadge.style.cssText = 'width: 90%; margin: 12px auto; padding: 10px; background: #dc3545; color: white; border-radius: 6px; font-weight: bold; font-size: 13px; text-align: center; display: block; font-family: sans-serif;';
+            
+            if (existingBtn && existingBtn.parentNode) {
+                existingBtn.parentNode.insertBefore(timeoutBadge, existingBtn.nextSibling);
+            } else {
+                card.appendChild(timeoutBadge);
+            }
+        }
+        else if (seatsLeft <= 0) {
+            // Case B: Housefull scenario -> Injection Closed Warning
+            const fullBadge = document.createElement('span');
+            fullBadge.className = 'reg-status-badge';
+            fullBadge.innerText = '🚫 Registration Closed (Housefull)';
+            fullBadge.style.cssText = 'width: 90%; margin: 12px auto; padding: 10px; background: #6c757d; color: white; border-radius: 6px; font-weight: bold; font-size: 13px; text-align: center; display: block; font-family: sans-serif;';
+            
+            if (existingBtn && existingBtn.parentNode) {
+                existingBtn.parentNode.insertBefore(fullBadge, existingBtn.nextSibling);
+            } else {
+                card.appendChild(fullBadge);
+            }
+        }
+        else {
+            // Case C: Everything fine -> Active Register Interface Button
+            const regBtn = document.createElement('button');
+            regBtn.className = 'btn-custom-register';
+            regBtn.innerText = '🎟️ Register Now';
+            regBtn.style.cssText = 'width: 90%; margin: 12px auto; display: block; padding: 10px 15px; background: #007bff; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; text-align: center; z-index: 999; box-shadow: 0 2px 5px rgba(0,0,0,0.15);';
+            
+            regBtn.onmouseover = () => regBtn.style.background = '#0056b3';
+            regBtn.onmouseout = () => regBtn.style.background = '#007bff';
+            
+            regBtn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openRegModal(eventId, eventTitle);
+            };
+
+            if (existingBtn && existingBtn !== regBtn && existingBtn.parentNode) {
+                existingBtn.parentNode.insertBefore(regBtn, existingBtn.nextSibling);
+            } else {
+                card.appendChild(regBtn);
+            }
+        }
+    });
 }
 
-// 👁️ MUTATION OBSERVER: பிரவுசர் கார்டுகளை அழிச்சு அழிச்சு எழுதினாலும், இது விடாம பட்டனை ஒட்டும்!
+// 👁️ MUTATION OBSERVER ENGINE SYSTEM
 const observer = new MutationObserver((mutations) => {
-    forceInjectRegButtons();
+    forceInjectRegButtons();
 });
 observer.observe(document.body, { childList: true, subtree: true });
 
-// Initial load check
+// Initial Load Check
 setTimeout(forceInjectRegButtons, 500);
 
 // --- FORM MODAL CONTROLS ---
 function openRegModal(id, title) {
-    const modal = document.getElementById('newRegisterFormModal');
-    if (!modal) return;
-    document.getElementById('regTargetEventId').value = id;
-    document.getElementById('regModalEventTitle').innerText = `Register for: ${title}`;
-    modal.style.display = 'flex';
+    const modal = document.getElementById('newRegisterFormModal');
+    if (!modal) return;
+    document.getElementById('regTargetEventId').value = id;
+    document.getElementById('regModalEventTitle').innerText = `Register for: ${title}`;
+    modal.style.display = 'flex';
 }
 
 function closeRegModal() {
-    document.getElementById('newRegisterFormModal').style.display = 'none';
-    document.getElementById('regStudentName').value = '';
-    document.getElementById('regStudentRoll').value = '';
-    document.getElementById('regStudentClass').value = '';
-    document.getElementById('regStudentDept').value = '';
-    document.getElementById('regStudentEmail').value = '';
-    document.getElementById('regStudentMobile').value = '';
+    const modal = document.getElementById('newRegisterFormModal');
+    if (modal) modal.style.display = 'none';
+    document.getElementById('regStudentName').value = '';
+    document.getElementById('regStudentRoll').value = '';
+    document.getElementById('regStudentClass').value = '';
+    document.getElementById('regStudentDept').value = '';
+    document.getElementById('regStudentEmail').value = '';
+    document.getElementById('regStudentMobile').value = '';
 }
 
 // --- SUBMIT COMPILATION DATA ---
 function submitStudentRegistration() {
-    const id = document.getElementById('regTargetEventId').value;
-    const eventTitle = document.getElementById('regModalEventTitle').innerText.replace('Register for: ', '');
-    const name = document.getElementById('regStudentName').value.trim();
-    const roll = document.getElementById('regStudentRoll').value.trim();
-    const sClass = document.getElementById('regStudentClass').value.trim();
-    const dept = document.getElementById('regStudentDept').value.trim();
-    const email = document.getElementById('regStudentEmail').value.trim();
-    const mobile = document.getElementById('regStudentMobile').value.trim();
+    const id = document.getElementById('regTargetEventId').value;
+    const eventTitle = document.getElementById('regModalEventTitle').innerText.replace('Register for: ', '');
+    const name = document.getElementById('regStudentName').value.trim();
+    const roll = document.getElementById('regStudentRoll').value.trim();
+    const sClass = document.getElementById('regStudentClass').value.trim();
+    const dept = document.getElementById('regStudentDept').value.trim();
+    const email = document.getElementById('regStudentEmail').value.trim();
+    const mobile = document.getElementById('regStudentMobile').value.trim();
 
-    if (!name || !roll || !sClass || !dept || !email || !mobile) {
-        alert("Boss! All 6 registration fields are mandatory!");
-        return;
-    }
+    if (!name || !roll || !sClass || !dept || !email || !mobile) {
+        alert("Boss! All 6 registration fields are mandatory!");
+        return;
+    }
 
-    let records = JSON.parse(localStorage.getItem('hhRegistrations')) || [];
-    const newReg = {
-        eventId: id,
-        eventTitle: eventTitle,
-        name: name,
-        roll: roll,
-        classSection: sClass,
-        department: dept,
-        email: email,
-        mobile: mobile,
-        timestamp: new Date().toLocaleString()
-    };
+    let records = JSON.parse(localStorage.getItem('hhRegistrations')) || [];
+    const newReg = {
+        eventId: id, eventTitle: eventTitle, name: name, roll: roll,
+        classSection: sClass, department: dept, email: email, mobile: mobile,
+        timestamp: new Date().toLocaleString()
+    };
 
-    records.push(newReg);
-    localStorage.setItem('hhRegistrations', JSON.stringify(records));
-
-    alert(`Mass Boss! ${name} successfully registered for ${eventTitle}!`);
-    closeRegModal();
+    records.push(newReg);
+    localStorage.setItem('hhRegistrations', JSON.stringify(records));
+    alert(`Mass Boss! ${name} successfully registered for ${eventTitle}!`);
+    
+    forceInjectRegButtons(); 
+    closeRegModal();
+    location.reload(); 
 }
 
 // --- CONTROLLER EXCLUSIVE MANAGEMENT VIEWS ---
 function openAdminRegModal() {
-    const tableBody = document.getElementById('adminRegTableBody');
-    if(!tableBody) return;
-    tableBody.innerHTML = '';
+    const tableBody = document.getElementById('adminRegTableBody');
+    if(!tableBody) return;
+    tableBody.innerHTML = '';
 
-    let records = JSON.parse(localStorage.getItem('hhRegistrations')) || [];
+    let records = JSON.parse(localStorage.getItem('hhRegistrations')) || [];
 
-    if (records.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="7" style="padding: 15px; text-align: center; color: #666;">No student registrations recorded yet, boss!</td></tr>`;
-        document.getElementById('adminRegistrationViewModal').style.display = 'flex';
-        return;
-    }
+    if (records.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="7" style="padding: 15px; text-align: center; color: #666;">No student registrations recorded yet, boss!</td></tr>`;
+        document.getElementById('adminRegistrationViewModal').style.display = 'flex';
+        return;
+    }
 
-    records.forEach(rec => {
-        const row = document.createElement('tr');
-        row.style.borderBottom = '1px solid #eee';
-        row.innerHTML = `
-            <td style="padding: 10px; font-weight: bold;">${rec.eventTitle}</td>
-            <td style="padding: 10px;">${rec.name}</td>
-            <td style="padding: 10px; color: #555;">${rec.roll}</td>
-            <td style="padding: 10px;">${rec.classSection}</td>
-            <td style="padding: 10px;">${rec.department}</td>
-            <td style="padding: 10px; font-size: 13px;">${rec.email}</td>
-            <td style="padding: 10px;">${rec.mobile}</td>
-        `;
-        tableBody.appendChild(row);
-    });
+    records.forEach(rec => {
+        const row = document.createElement('tr');
+        row.style.borderBottom = '1px solid #eee';
+        row.innerHTML = `
+            <td style="padding: 10px; font-weight: bold;">${rec.eventTitle}</td>
+            <td style="padding: 10px;">${rec.name}</td>
+            <td style="padding: 10px; color: #555;">${rec.roll}</td>
+            <td style="padding: 10px;">${rec.classSection}</td>
+            <td style="padding: 10px;">${rec.department}</td>
+            <td style="padding: 10px; font-size: 13px;">${rec.email}</td>
+            <td style="padding: 10px;">${rec.mobile}</td>
+        `;
+        tableBody.appendChild(row);
+    });
 
-    document.getElementById('adminRegistrationViewModal').style.display = 'flex';
+    document.getElementById('adminRegistrationViewModal').style.display = 'flex';
 }
 
 function closeAdminRegModal() {
-    document.getElementById('adminRegistrationViewModal').style.display = 'none';
+    document.getElementById('adminRegistrationViewModal').style.display = 'none';
 }
 
 function exportRegDataToCSV() {
-    let records = JSON.parse(localStorage.getItem('hhRegistrations')) || [];
-    if (records.length === 0) return alert("No data available to export, boss!");
+    let records = JSON.parse(localStorage.getItem('hhRegistrations')) || [];
+    if (records.length === 0) return alert("No data available to export, boss!");
 
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Event Name,Student Name,Roll Number,Class & Section,Department,Email,Mobile,Timestamp\n";
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Event Name,Student Name,Roll Number,Class & Section,Department,Email,Mobile,Timestamp\n";
 
-    records.forEach(rec => {
-        let row = `"${rec.eventTitle}","${rec.name}","${rec.roll}","${rec.classSection}","${rec.department}","${rec.email}","${rec.mobile}","${rec.timestamp}"`;
-        csvContent += row + "\n";
-    });
+    records.forEach(rec => {
+        let row = `"${rec.eventTitle}","${rec.name}","${rec.roll}","${rec.classSection}","${rec.department}","${rec.email}","${rec.mobile}","${rec.timestamp}"`;
+        csvContent += row + "\n";
+    });
 
-    const encodedUri = encodeURI(csvContent);
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", encodedUri);
-    downloadAnchor.setAttribute("download", "HappnHub_Event_Registrations.csv");
-    document.body.appendChild(downloadAnchor);
-    
-    downloadAnchor.click();
-    document.body.removeChild(downloadAnchor);
-} 
+    const encodedUri = encodeURI(csvContent);
+    const downloadAnchor = document.createElement("a");
+    downloadAnchor.setAttribute("href", encodedUri);
+    downloadAnchor.setAttribute("download", "HappnHub_Event_Registrations.csv");
+    document.body.appendChild(downloadAnchor);
+    
+    downloadAnchor.click();
+    document.body.removeChild(downloadAnchor);
+}
+// =================================================================
+// 🔗 AUTOMATIC DATA INTERCEPTOR PIPELINE (STEP 2 CORE FIX)
+// =================================================================
+(function() {
+    // 1. Hook into Add Event Logic
+    const saveBtn = document.getElementById('saveEventBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function() {
+            const dateVal = document.getElementById('formEventDate')?.value || "";
+            const regEndVal = document.getElementById('formRegEndTime')?.value || "";
+            
+            // Temporary log console check layout 
+            console.log("Captured Dynamic Form Inputs:", dateVal, regEndVal);
+        });
+    }
+
+    // 2. Intercept Event Creation to Attach HTML attributes 
+    const originalCreateElement = document.createElement;
+    document.createElement = function(tagName) {
+        const element = originalCreateElement.call(document, tagName);
+        if (tagName.toLowerCase() === 'div') {
+            // dynamic checker hook inject inside Mutation observer system
+            setTimeout(() => {
+                if (element.classList && (element.classList.contains('event-card') || element.classList.contains('card'))) {
+                    const dateInput = document.getElementById('formEventDate')?.value;
+                    const regInput = document.getElementById('formRegEndTime')?.value;
+                    if (dateInput) element.setAttribute('data-event-date', dateInput);
+                    if (regInput) element.setAttribute('data-reg-end', regInput);
+                }
+            }, 50);
+        }
+        return element;
+    };
+})();
