@@ -225,7 +225,6 @@ function injectRegistrationButtonsDirectly() {
         actionRow.appendChild(registerBtn);
     });
 }
-
 // Every 1 sec continuous execution engine
 setInterval(injectRegistrationButtonsDirectly, 1000);
 // --- ADMIN POPUP CONTROL ---
@@ -236,9 +235,8 @@ function openAddEventModal() {
 function closeEventModal() {
     document.getElementById('eventModal').style.display = 'none';
 }
-
 // --- SAVE LOGIC ---
-document.getElementById('saveEventBtn').addEventListener('click', function() {
+document.getElementById('saveEventBtn')?.addEventListener('click', function() {
     const name = document.getElementById('formEventName').value;
     const venue = document.getElementById('formVenue').value;
     const limit = document.getElementById('formStudentLimit').value;
@@ -621,125 +619,66 @@ function saveEditedEventChanges() {
     location.reload();
 }
 // =================================================================
-// 🔥 UPGRADED ADVANCED MUTATION ENGINE: SEATS & AUTO-DEADLINE LOOKUP
+// 🎟️ SAFE SEAT TRACKER & TIMEOUT ENGINE (NO DUPLICATE LOOPS)
 // =================================================================
 
-function forceInjectRegButtons() {
-    const allCards = document.querySelectorAll('.event-card, [id^="event-"], .card, .events-container > div, .events-grid > div, [class*="card"]');
+// UI-la dynamic indicators-ai safe-ah apply panra function
+function updateEventCardStatus(card, eventId, eventTitle, maxLimit, regEndStr) {
+    // 1. Double inject aaguradha thaduka safe target check
+    if (card.querySelector('.dynamic-seat-verified')) return;
+
+    // 2. LocalStorage storage sync
+    let allRegs = JSON.parse(localStorage.getItem('hhRegistrations')) || [];
+    let currentRegCount = allRegs.filter(reg => reg.eventId === eventId).length;
+    let seatsLeft = maxLimit - currentRegCount;
+
+    // 3. Registration Deadline check
+    let isTimeExpired = false;
+    if (regEndStr) {
+        let deadline = new Date(regEndStr);
+        let now = new Date();
+        if (now > deadline) {
+            isTimeExpired = true;
+        }
+    }
+
+    // 4. Inga oru single container element create panniduvom
+    const controlDiv = document.createElement('div');
+    controlDiv.className = 'dynamic-seat-verified';
+    controlDiv.style.cssText = 'text-align: center; margin: 10px auto; width: 100%;';
+
+    let seatText = seatsLeft <= 0 
+        ? `<span style="color: #dc3545; font-weight: bold; font-size: 13px;">⚠️ Seats Full (0/${maxLimit})</span>` 
+        : `<span style="color: #28a745; font-weight: bold; font-size: 13px;">🎟️ Seats Left: ${seatsLeft}/${maxLimit}</span>`;
     
-    allCards.forEach((card) => {
-        // Anti-duplicate layers check
-        if (card.querySelector('.btn-custom-register') || card.querySelector('.reg-status-badge')) return;
+    controlDiv.innerHTML = `<p style="margin: 4px 0;">${seatText}</p>`;
+    card.appendChild(controlDiv);
 
-        // 1. EXTRACT DATA PROPERTY VALUES FROM CARD
-        let eventTitle = "Campus Event";
-        const heading = card.querySelector('h3, h4, .event-title, .title, strong');
-        if (heading) {
-            eventTitle = heading.innerText.trim();
-        } else {
-            eventTitle = card.innerText.split('\n')[0].trim();
-        }
+    // 5. Existing Register button display changes
+    const originalBtn = card.querySelector('.btn-custom-register') || card.querySelector('button, .btn');
 
-        let eventId = card.getAttribute('data-id') || card.id || "EVT-" + encodeURIComponent(eventTitle).substring(0, 10);
-
-        // 2. REAL-TIME LOCAL STORAGE SEAT TRACKER
-        let allRegs = JSON.parse(localStorage.getItem('hhRegistrations')) || [];
-        let currentRegCount = allRegs.filter(reg => reg.eventId === eventId).length;
-
-        // Max limit processing lookup (card attribute-la irundhu edukum, illena 50 limit default)
-        let maxLimit = parseInt(card.getAttribute('data-limit')) || 50; 
-        let seatsLeft = maxLimit - currentRegCount;
-
-        // 3. REGISTRATION DEADLINE CALCULATOR ENGINE
-        let regEndStr = card.getAttribute('data-reg-end') || card.getAttribute('data-event-date'); 
-        let isTimeExpired = false;
-        
-        if (regEndStr) {
-            let deadline = new Date(regEndStr);
-            let now = new Date();
-            if (now > deadline) {
-                isTimeExpired = true;
-            }
-        }
-
-        // 4. DESIGN SEAT COUNTER LABELS Dynamic UI Insertion
-        if (!card.querySelector('.seat-counter-lbl')) {
-            const seatIndicator = document.createElement('div');
-            seatIndicator.className = 'seat-counter-lbl';
-            seatIndicator.style.cssText = 'font-size: 13px; font-weight: bold; margin: 8px auto; text-align: center; font-family: sans-serif; width: 90%;';
-            
-            if (seatsLeft <= 0) {
-                seatIndicator.innerHTML = `⚠️ <span style="color: #dc3545;">Seats Full (0/${maxLimit})</span>`;
-            } else {
-                seatIndicator.innerHTML = `🎟️ <span style="color: #28a745;">Seats Left: ${seatsLeft}/${maxLimit}</span>`;
-            }
-            card.appendChild(seatIndicator);
-        }
-
-        // 5. CONDITIONAL RENDER PIPELINE ACTION ROW
-        const existingBtn = card.querySelector('button, .btn, .btn-custom-register');
-        
+    if (originalBtn) {
         if (isTimeExpired) {
-            // Case A: Timeout scenario -> Injection Closed Warning
-            const timeoutBadge = document.createElement('span');
-            timeoutBadge.className = 'reg-status-badge';
-            timeoutBadge.innerText = '🚫 Registration Closed (Timeout)';
-            timeoutBadge.style.cssText = 'width: 90%; margin: 12px auto; padding: 10px; background: #dc3545; color: white; border-radius: 6px; font-weight: bold; font-size: 13px; text-align: center; display: block; font-family: sans-serif;';
-            
-            if (existingBtn && existingBtn.parentNode) {
-                existingBtn.parentNode.insertBefore(timeoutBadge, existingBtn.nextSibling);
-            } else {
-                card.appendChild(timeoutBadge);
-            }
-        }
-        else if (seatsLeft <= 0) {
-            // Case B: Housefull scenario -> Injection Closed Warning
-            const fullBadge = document.createElement('span');
-            fullBadge.className = 'reg-status-badge';
-            fullBadge.innerText = '🚫 Registration Closed (Housefull)';
-            fullBadge.style.cssText = 'width: 90%; margin: 12px auto; padding: 10px; background: #6c757d; color: white; border-radius: 6px; font-weight: bold; font-size: 13px; text-align: center; display: block; font-family: sans-serif;';
-            
-            if (existingBtn && existingBtn.parentNode) {
-                existingBtn.parentNode.insertBefore(fullBadge, existingBtn.nextSibling);
-            } else {
-                card.appendChild(fullBadge);
-            }
-        }
-        else {
-            // Case C: Everything fine -> Active Register Interface Button
-            const regBtn = document.createElement('button');
-            regBtn.className = 'btn-custom-register';
-            regBtn.innerText = '🎟️ Register Now';
-            regBtn.style.cssText = 'width: 90%; margin: 12px auto; display: block; padding: 10px 15px; background: #007bff; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; text-align: center; z-index: 999; box-shadow: 0 2px 5px rgba(0,0,0,0.15);';
-            
-            regBtn.onmouseover = () => regBtn.style.background = '#0056b3';
-            regBtn.onmouseout = () => regBtn.style.background = '#007bff';
-            
-            regBtn.onclick = function(e) {
+            originalBtn.style.background = "#dc3545";
+            originalBtn.innerText = "🚫 Timeout (Closed)";
+            originalBtn.disabled = true;
+            originalBtn.style.cursor = "not-allowed";
+        } else if (seatsLeft <= 0) {
+            originalBtn.style.background = "#6c757d";
+            originalBtn.innerText = "🚫 Housefull";
+            originalBtn.disabled = true;
+            originalBtn.style.cursor = "not-allowed";
+        } else {
+            // Normal Active status
+            originalBtn.onclick = function(e) {
                 e.preventDefault();
-                e.stopPropagation();
                 openRegModal(eventId, eventTitle);
             };
-
-            if (existingBtn && existingBtn !== regBtn && existingBtn.parentNode) {
-                existingBtn.parentNode.insertBefore(regBtn, existingBtn.nextSibling);
-            } else {
-                card.appendChild(regBtn);
-            }
         }
-    });
+    }
 }
 
-// 👁️ MUTATION OBSERVER ENGINE SYSTEM
-const observer = new MutationObserver((mutations) => {
-    forceInjectRegButtons();
-});
-observer.observe(document.body, { childList: true, subtree: true });
-
-// Initial Load Check
-setTimeout(forceInjectRegButtons, 500);
-
-// --- FORM MODAL CONTROLS ---
+// Global modal dynamic trigger settings
 function openRegModal(id, title) {
     const modal = document.getElementById('newRegisterFormModal');
     if (!modal) return;
@@ -751,15 +690,12 @@ function openRegModal(id, title) {
 function closeRegModal() {
     const modal = document.getElementById('newRegisterFormModal');
     if (modal) modal.style.display = 'none';
-    document.getElementById('regStudentName').value = '';
-    document.getElementById('regStudentRoll').value = '';
-    document.getElementById('regStudentClass').value = '';
-    document.getElementById('regStudentDept').value = '';
-    document.getElementById('regStudentEmail').value = '';
-    document.getElementById('regStudentMobile').value = '';
+    ['regStudentName', 'regStudentRoll', 'regStudentClass', 'regStudentDept', 'regStudentEmail', 'regStudentMobile'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
 }
 
-// --- SUBMIT COMPILATION DATA ---
 function submitStudentRegistration() {
     const id = document.getElementById('regTargetEventId').value;
     const eventTitle = document.getElementById('regModalEventTitle').innerText.replace('Register for: ', '');
@@ -771,7 +707,7 @@ function submitStudentRegistration() {
     const mobile = document.getElementById('regStudentMobile').value.trim();
 
     if (!name || !roll || !sClass || !dept || !email || !mobile) {
-        alert("Boss! All 6 registration fields are mandatory!");
+        alert("Boss! All fields are mandatory!");
         return;
     }
 
@@ -784,101 +720,44 @@ function submitStudentRegistration() {
 
     records.push(newReg);
     localStorage.setItem('hhRegistrations', JSON.stringify(records));
-    alert(`Mass Boss! ${name} successfully registered for ${eventTitle}!`);
+    alert(`Mass Boss! ${name} successfully registered!`);
     
-    forceInjectRegButtons(); 
     closeRegModal();
     location.reload(); 
 }
 
-// --- CONTROLLER EXCLUSIVE MANAGEMENT VIEWS ---
+// --- ADMIN CONTROLS ---
 function openAdminRegModal() {
     const tableBody = document.getElementById('adminRegTableBody');
     if(!tableBody) return;
     tableBody.innerHTML = '';
-
     let records = JSON.parse(localStorage.getItem('hhRegistrations')) || [];
-
     if (records.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="7" style="padding: 15px; text-align: center; color: #666;">No student registrations recorded yet, boss!</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="7" style="padding: 15px; text-align: center;">No registrations recorded yet, boss!</td></tr>`;
         document.getElementById('adminRegistrationViewModal').style.display = 'flex';
         return;
     }
-
     records.forEach(rec => {
         const row = document.createElement('tr');
         row.style.borderBottom = '1px solid #eee';
-        row.innerHTML = `
-            <td style="padding: 10px; font-weight: bold;">${rec.eventTitle}</td>
-            <td style="padding: 10px;">${rec.name}</td>
-            <td style="padding: 10px; color: #555;">${rec.roll}</td>
-            <td style="padding: 10px;">${rec.classSection}</td>
-            <td style="padding: 10px;">${rec.department}</td>
-            <td style="padding: 10px; font-size: 13px;">${rec.email}</td>
-            <td style="padding: 10px;">${rec.mobile}</td>
-        `;
+        row.innerHTML = `<td style="padding:10px; font-weight:bold;">${rec.eventTitle}</td><td style="padding:10px;">${rec.name}</td><td style="padding:10px;">${rec.roll}</td><td style="padding:10px;">${rec.classSection}</td><td style="padding:10px;">${rec.department}</td><td style="padding:10px;">${rec.email}</td><td style="padding:10px;">${rec.mobile}</td>`;
         tableBody.appendChild(row);
     });
-
     document.getElementById('adminRegistrationViewModal').style.display = 'flex';
 }
-
 function closeAdminRegModal() {
     document.getElementById('adminRegistrationViewModal').style.display = 'none';
 }
-
 function exportRegDataToCSV() {
     let records = JSON.parse(localStorage.getItem('hhRegistrations')) || [];
-    if (records.length === 0) return alert("No data available to export, boss!");
-
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Event Name,Student Name,Roll Number,Class & Section,Department,Email,Mobile,Timestamp\n";
-
-    records.forEach(rec => {
-        let row = `"${rec.eventTitle}","${rec.name}","${rec.roll}","${rec.classSection}","${rec.department}","${rec.email}","${rec.mobile}","${rec.timestamp}"`;
-        csvContent += row + "\n";
-    });
-
+    if (records.length === 0) return alert("No data to export!");
+    let csvContent = "data:text/csv;charset=utf-8,Event Name,Student Name,Roll Number,Class,Department,Email,Mobile,Timestamp\n";
+    records.forEach(rec => { csvContent += `"${rec.eventTitle}","${rec.name}","${rec.roll}","${rec.classSection}","${rec.department}","${rec.email}","${rec.mobile}","${rec.timestamp}"\n`; });
     const encodedUri = encodeURI(csvContent);
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", encodedUri);
-    downloadAnchor.setAttribute("download", "HappnHub_Event_Registrations.csv");
+    downloadAnchor.setAttribute("download", "HappnHub_Registrations.csv");
     document.body.appendChild(downloadAnchor);
-    
     downloadAnchor.click();
     document.body.removeChild(downloadAnchor);
 }
-// =================================================================
-// 🔗 AUTOMATIC DATA INTERCEPTOR PIPELINE (STEP 2 CORE FIX)
-// =================================================================
-(function() {
-    // 1. Hook into Add Event Logic
-    const saveBtn = document.getElementById('saveEventBtn');
-    if (saveBtn) {
-        saveBtn.addEventListener('click', function() {
-            const dateVal = document.getElementById('formEventDate')?.value || "";
-            const regEndVal = document.getElementById('formRegEndTime')?.value || "";
-            
-            // Temporary log console check layout 
-            console.log("Captured Dynamic Form Inputs:", dateVal, regEndVal);
-        });
-    }
-
-    // 2. Intercept Event Creation to Attach HTML attributes 
-    const originalCreateElement = document.createElement;
-    document.createElement = function(tagName) {
-        const element = originalCreateElement.call(document, tagName);
-        if (tagName.toLowerCase() === 'div') {
-            // dynamic checker hook inject inside Mutation observer system
-            setTimeout(() => {
-                if (element.classList && (element.classList.contains('event-card') || element.classList.contains('card'))) {
-                    const dateInput = document.getElementById('formEventDate')?.value;
-                    const regInput = document.getElementById('formRegEndTime')?.value;
-                    if (dateInput) element.setAttribute('data-event-date', dateInput);
-                    if (regInput) element.setAttribute('data-reg-end', regInput);
-                }
-            }, 50);
-        }
-        return element;
-    };
-})();
