@@ -1,3 +1,145 @@
+/* ===========================================
+   HAPPNHUB v2 - GLOBAL VARIABLES
+=========================================== */
+
+// ---------- Supabase ----------
+const supabaseUrl = "https://kedvqtogjbqsdzuhclte.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZHZxdG9namJxc2R6dWhjbHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0NTQ0MjMsImV4cCI6MjEwMDAzMDQyM30.zk1N2ejJ3JkzP6a7y77Q0oMjxtOtUbhCxBd3CCNpr9g";
+
+const db = window.supabase.createClient(
+    supabaseUrl,
+    supabaseKey
+);
+
+// ---------- App ----------
+let currentUser = null;
+let currentAdmin = null;
+
+let events = [];
+let registrations = [];
+let students = [];
+let payments = [];
+let odForms = [];
+
+// ---------- Selected ----------
+let selectedEventId = null;
+let selectedRegistrationId = null;
+
+// ---------- Constants ----------
+const DEFAULT_PASSWORD = "college@123";
+
+// ===========================================
+// INITIALIZE
+// ===========================================
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+    console.log("================================");
+    console.log("HAPPNHUB Started");
+    console.log("Version : 2.0");
+    console.log("================================");
+
+    await loadEvents();
+    await loadStudents();
+    await loadRegistrations();
+
+    updateSeatCounts();
+
+});
+/* ===========================================
+   LOAD EVENTS
+=========================================== */
+
+async function loadEvents() {
+
+    try {
+
+        const { data, error } = await db
+            .from("events")
+            .select("*")
+            .order("event_date", { ascending: true });
+
+        if (error) throw error;
+
+        events = data || [];
+
+        renderEvents();
+
+    } catch (err) {
+
+        console.error("Load Events Error", err);
+
+    }
+
+}
+
+
+/* ===========================================
+   LOAD STUDENTS
+=========================================== */
+
+async function loadStudents() {
+
+    try {
+
+        const { data, error } = await db
+            .from("students")
+            .select("*");
+
+        if (error) throw error;
+
+        students = data || [];
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+    }
+
+}
+
+
+/* ===========================================
+   LOAD REGISTRATIONS
+=========================================== */
+
+async function loadRegistrations() {
+
+    try {
+
+        const { data, error } = await db
+            .from("registrations")
+            .select("*");
+
+        if (error) throw error;
+
+        registrations = data || [];
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+    }
+
+}
+/* ===========================================
+   UPDATE SEATS
+=========================================== */
+
+function updateSeatCounts() {
+
+    events.forEach(event => {
+
+        event.remainingSeats =
+            event.seat_limit - event.registered_count;
+
+    });
+
+}
 let events = JSON.parse(localStorage.getItem('hhEvents')) || [];
 const eventGrid = document.getElementById("eventGrid");
 const savedEventsContainer = document.getElementById("savedEvents");
